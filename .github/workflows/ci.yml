@@ -9,9 +9,24 @@ permissions:
   contents: read
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  windows-app:
+    runs-on: windows-latest
     timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run check
+      - run: npm run lint
+      - run: npm run build
+
+  database-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       mariadb:
         image: mariadb:11.4
@@ -38,7 +53,4 @@ jobs:
       - run: npm ci
       - name: Initialize test schema
         run: mysql --host=127.0.0.1 --port=3306 --user=root --password=cut-iq-ci cutiq < installer/schema.sql
-      - run: npm test
-      - run: npm run check
-      - run: npm run lint
-      - run: npm run build
+      - run: npx vitest run server/script/pipeline.test.ts
