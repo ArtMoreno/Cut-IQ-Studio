@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Cut IQ Studio app icon</title>
+  <desc id="desc">The Cut IQ green mark on carbon black.</desc>
+  <rect width="1024" height="1024" fill="#0B0D0C"/>
+  <path d="M760 213H405C260 213 170 326 170 512s90 299 235 299h355" fill="none" stroke="#85E11F" stroke-width="170" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M451 385c0-30 33-47 58-32l211 126c26 16 26 51 0 67L509 672c-25 15-58-2-58-32V385Z" fill="#85E11F"/>
+</svg>

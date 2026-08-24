@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+.vite/
+.tmp/
+coverage/
+installer/runtime/
+installer/output/
+installer/test-install/
+installer/.cache/
+site/.vite/
+.DS_Store
+Thumbs.db

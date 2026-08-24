@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Cut IQ Studio</title>
+  <desc id="desc">Cut IQ Studio stacked logo in green and soft white.</desc>
+  <defs>
+    <linearGradient id="cut-green" x1="280" y1="65" x2="875" y2="665" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B7FF2A"/><stop offset=".55" stop-color="#77D51D"/><stop offset="1" stop-color="#3FA313"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(245 -18) scale(.69)">
+    <path d="M744 205H402C253 205 160 321 160 512s93 307 242 307h342" fill="none" stroke="url(#cut-green)" stroke-width="176" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M444 380c0-31 34-49 60-33l218 130c27 16 27 54 0 70L504 677c-26 16-60-2-60-33V380Z" fill="url(#cut-green)"/>
+  </g>
+  <text x="600" y="842" text-anchor="middle" font-family="Sora, Segoe UI, sans-serif" font-size="150" font-weight="650" letter-spacing="-6" fill="#F7F8F5">CUT IQ</text>
+  <text x="600" y="963" text-anchor="middle" font-family="Sora, Segoe UI, sans-serif" font-size="54" font-weight="550" letter-spacing="29" fill="#85E11F">STUDIO</text>
+</svg>

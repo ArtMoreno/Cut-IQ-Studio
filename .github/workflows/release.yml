@@ -1,0 +1,52 @@
+name: Windows release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run check
+      - run: npm run lint
+      - run: npm run build
+      - name: Prepare verified runtime
+        shell: pwsh
+        run: ./installer/prepare-runtime.ps1
+      - name: Install verified Inno Setup compiler
+        shell: pwsh
+        run: |
+          $download = Join-Path $env:RUNNER_TEMP 'innosetup-7.1.0-x64.exe'
+          $target = Join-Path $env:RUNNER_TEMP 'InnoSetup7'
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe' -OutFile $download
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $download).Hash
+          if ($hash -ne '0362A383ED217D4C4239B5933866DD96D3EB2102737DA92F80F6057A4B40DF2F') { throw 'Inno Setup checksum mismatch.' }
+          $signature = Get-AuthenticodeSignature -LiteralPath $download
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Pyrsys B\.V\.') { throw 'Inno Setup signature verification failed.' }
+          $process = Start-Process -FilePath $download -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-',"/DIR=$target") -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Inno Setup install failed: $($process.ExitCode)" }
+          "INNO_ISCC=$target\ISCC.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Compile installer
+        shell: pwsh
+        run: ./installer/build-installer.ps1 -SkipRuntime -SkipQualityGates
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Cut IQ Studio ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            installer/output/Cut-IQ-Studio-Setup.exe
+            installer/output/SHA256SUMS.txt
+            THIRD_PARTY_NOTICES.md

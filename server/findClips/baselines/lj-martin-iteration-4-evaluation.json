@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "clipsift-highlight-tuner-iteration-4-evaluation",
+  "capture": {
+    "jobId": 14,
+    "player": "LJ Martin",
+    "team": "BYU",
+    "season": 2025,
+    "candidateCount": 507,
+    "readOnly": true,
+    "gateEnabled": false
+  },
+  "before": {
+    "balancedSelected": 48,
+    "highlightsSelected": 10,
+    "bestOnlySelected": 10,
+    "auditedPrecision": 1,
+    "auditedCandidateRecall": 0.286,
+    "knownDuplicatePairsSurviving": 3,
+    "wrongSeasonCandidatesEligible": 5
+  },
+  "after": {
+    "balancedSelected": 38,
+    "balancedDuplicateRejects": 23,
+    "highlightsSelected": 10,
+    "highlightsDuplicateRejects": 10,
+    "bestOnlySelected": 10,
+    "bestOnlyDuplicateRejects": 10,
+    "auditedPrecision": 1,
+    "auditedEventRecall": 1,
+    "knownDuplicatePairsSurviving": 0,
+    "wrongSeasonCandidatesEligible": 0,
+    "highlightsCandidateIds": [6129, 6139, 6183, 6278, 6283, 6301, 6393, 6491, 6240, 6196]
+  },
+  "verifiedCorrections": [
+    "player-bound adjacent and touchdown-before calls",
+    "player-local yd and yds gains",
+    "candidate-retaining duplicate suppression",
+    "Arizona alternate-upload grouping",
+    "Cincinnati and Iowa State month-token grouping",
+    "Texas Tech regular/championship separation",
+    "two-digit broadcast-date season exclusion"
+  ],
+  "knownLimitations": [
+    "Highlights and Best Only select the same ten events on this running-back corpus because every surviving event satisfies both presets.",
+    "The calibrated action vocabulary is running-back-first; defensive control jobs require position-specific event cues before a general-position claim.",
+    "This is an offline selector evaluation, not rendered-output success evidence."
+  ]
+}

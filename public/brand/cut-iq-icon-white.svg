@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Cut IQ Studio</title>
+  <desc id="desc">A rounded white C surrounding a white play symbol.</desc>
+  <path d="M744 205H402C253 205 160 321 160 512s93 307 242 307h342" fill="none" stroke="#F7F8F5" stroke-width="176" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M444 380c0-31 34-49 60-33l218 130c27 16 27 54 0 70L504 677c-26 16-60-2-60-33V380Z" fill="#F7F8F5"/>
+</svg>

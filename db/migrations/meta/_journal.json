@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786518830075,
+      "tag": "0000_transcript_studio",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786520609399,
+      "tag": "0001_local_whisper",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786790000000,
+      "tag": "0002_assemble",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786791000000,
+      "tag": "0003_assemble_csc_source",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "clipsift-find-clips-control-jobs",
+  "capture": {
+    "source": "GET /api/control/job/:id",
+    "readOnly": true
+  },
+  "jobs": [
+    {
+      "id": 13,
+      "projectFk": 115,
+      "player": "Armondo Blount",
+      "team": "Miami",
+      "status": "completed",
+      "candidateCounter": 35,
+      "candidateRows": 53,
+      "approvedReady": 27,
+      "sourceRows": 26,
+      "uniqueCandidateSourceUrls": 21
+    },
+    {
+      "id": 12,
+      "projectFk": 111,
+      "player": "Damari Brown",
+      "team": "Miami",
+      "status": "completed_with_warnings",
+      "candidateCounter": 158,
+      "candidateRows": 164,
+      "approvedReady": 83,
+      "sourceRows": 24,
+      "uniqueCandidateSourceUrls": 23
+    },
+    {
+      "id": 11,
+      "projectFk": 89,
+      "player": "Xavier Lucas",
+      "team": "Miami Hurricanes",
+      "status": "completed_with_warnings",
+      "candidateCounter": 56,
+      "candidateRows": 62,
+      "approvedReady": 28,
+      "sourceRows": 19,
+      "uniqueCandidateSourceUrls": 17
+    }
+  ],
+  "notes": [
+    "The persisted candidatesFound counter is not assumed to equal the current detail candidate row count.",
+    "These controls are comparison snapshots only; Iteration 1 does not rerun or mutate them."
+  ]
+}

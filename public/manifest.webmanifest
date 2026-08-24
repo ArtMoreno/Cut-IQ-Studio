@@ -1,0 +1,18 @@
+{
+  "name": "Cut IQ Studio Companion",
+  "short_name": "Cut IQ",
+  "description": "Run Cut IQ jobs and review finished video clips from your phone.",
+  "start_url": "/m/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B0D0C",
+  "theme_color": "#0B0D0C",
+  "icons": [
+    {
+      "src": "/brand/cut-iq-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
