@@ -94,7 +94,7 @@ export interface ClipManifest {
  * field when it cannot be determined honestly (never guesses).
  *
  * Season is derived from the topic + script text only — the project `name` is
- * a generated `YYYY-MM-DD__CSC__...` run-date stamp, not a football season, so
+ * a generated `YYYY-MM-DD__JOB__...` run-date stamp, not a football season, so
  * it is excluded to avoid treating a run date as a season.
  */
 export function deriveSubject(input: {

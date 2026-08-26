@@ -30,12 +30,12 @@ CREATE TABLE `assemble_projects` (
   `name` varchar(255) NOT NULL,
   `source_project_fk` bigint(20) unsigned DEFAULT NULL,
   `doc` text NOT NULL,
-  `preset` varchar(32) NOT NULL DEFAULT 'csc-vertical',
+  `preset` varchar(32) NOT NULL DEFAULT 'vertical-9x16',
   `status` varchar(40) NOT NULL DEFAULT 'draft',
   `render_log` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `source_csc_slug` varchar(255) DEFAULT NULL,
+  `source_job_slug` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

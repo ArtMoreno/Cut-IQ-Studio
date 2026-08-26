@@ -4,7 +4,7 @@
  */
 
 export type Track = "V1" | "V2" | "A1" | "A2" | "A3";
-export type PresetId = "csc-vertical" | "youtube-16x9" | "square";
+export type PresetId = "vertical-9x16" | "youtube-16x9" | "square";
 export type ClipSourceMode = "action" | "replay" | "full-play" | "generic";
 
 export interface AssembleBeat {

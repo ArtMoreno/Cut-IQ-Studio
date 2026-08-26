@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/providers/trpc";
+import { isPaymentRequired, openProDialog } from "@/lib/license";
 import { fmtTime } from "@/lib/youtube";
 import { toCSV, toJSON, toMarkdown, toPlainText, toPremiereCSV, downloadFile, type ExportMoment } from "@/lib/export";
 import { ClipJobsPanel } from "@/components/ClipJobsPanel";
@@ -50,7 +51,10 @@ export function MomentsPanel({ videoDbId, video, currentTime, inPoint, outPoint,
   const deleteMoment = trpc.clipsift.deleteMoment.useMutation({ onSuccess: () => utils.clipsift.listMoments.invalidate() });
   const exportClips = trpc.clipsift.exportClips.useMutation();
   const renderMoment = trpc.clips.renderMoment.useMutation({ onSuccess: () => utils.clips.listJobs.invalidate() });
-  const renderVideoJobs = trpc.clips.renderVideoMoments.useMutation({ onSuccess: () => utils.clips.listJobs.invalidate() });
+  const renderVideoJobs = trpc.clips.renderVideoMoments.useMutation({
+    onSuccess: () => utils.clips.listJobs.invalidate(),
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Batch render"); },
+  });
   const { data: scriptProjects = [] } = trpc.script.listProjects.useQuery();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");

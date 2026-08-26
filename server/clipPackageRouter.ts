@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createRouter, publicQuery } from "./middleware";
+import { createRouter, proProcedure, publicQuery } from "./middleware";
 import { pickOutputDirectory } from "./transcriptStudio/desktopPicker";
 import {
   cancelClipPackageExport,
@@ -113,7 +113,9 @@ export const clipPackageRouter = createRouter({
       revertEditedReplacement(input.projectId, input.candidateId)
     ),
 
-  syncToDrive: publicQuery
+  // Pro: delivery. Reviewing and opening a package stays free; producing the
+  // packaged output, the soundbite set, or a Drive sync is the paid step.
+  syncToDrive: proProcedure
     .input(z.object({ projectId: z.number().int().positive() }))
     .mutation(({ input }) => syncClipPackageToLocalDrive(input.projectId)),
 
@@ -128,7 +130,7 @@ export const clipPackageRouter = createRouter({
       return { ok: true };
     }),
 
-  queueSoundbites: publicQuery
+  queueSoundbites: proProcedure
     .input(
       z.object({
         projectId: z.number().int().positive(),
@@ -139,7 +141,7 @@ export const clipPackageRouter = createRouter({
       queueBroadcastSoundbites(input.projectId, input.targetCount)
     ),
 
-  queueExport: publicQuery
+  queueExport: proProcedure
     .input(
       z
         .object({

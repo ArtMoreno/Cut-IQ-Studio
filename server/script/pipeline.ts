@@ -59,8 +59,8 @@ function appendLog(existing: string | null, entry: LogEntry): string {
 export function defaultProjectName(topic: string | undefined, requested: string | undefined): string {
   if (requested?.trim()) return requested.trim();
   const date = new Date().toISOString().slice(0, 10);
-  const t = (topic ?? "CSC").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
-  return `${date}__CSC__${t || "Untitled"}`;
+  const t = (topic ?? "pipeline").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+  return `${date}__JOB__${t || "Untitled"}`;
 }
 
 // ---------------------------------------------------------------- upsert ----

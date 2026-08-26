@@ -27,6 +27,7 @@ import {
 import { AppNav } from "@/components/AppNav";
 import { InlineError, InlineLoading } from "@/components/InlineState";
 import { trpc } from "@/providers/trpc";
+import { isPaymentRequired, openProDialog } from "@/lib/license";
 import {
   clipThumbnailSource,
   fmtClock,
@@ -145,6 +146,7 @@ function ClipPackageLoaded({ projectId }: { projectId: number }) {
   });
   const queueExport = trpc.clipPackage.queueExport.useMutation({
     onSuccess: (job) => setExportId(job.id),
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Package export"); },
   });
   const queueSoundbites = trpc.clipPackage.queueSoundbites.useMutation({
     onSuccess: (result) => {
@@ -155,6 +157,7 @@ function ClipPackageLoaded({ projectId }: { projectId: number }) {
           : "No strong broadcast sound bites were found in the indexed game feeds.");
       void packageQuery.refetch();
     },
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Broadcast soundbites"); },
   });
   const createStudioHandoff = trpc.clipPackage.createStudioHandoff.useMutation({
     onSuccess: ({ handoffId }) => {
@@ -193,6 +196,7 @@ function ClipPackageLoaded({ projectId }: { projectId: number }) {
   const openOutput = trpc.clipPackage.openOutput.useMutation();
   const syncToDrive = trpc.clipPackage.syncToDrive.useMutation({
     onSuccess: () => void packageQuery.refetch(),
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Drive sync"); },
   });
   const openDriveFolder = trpc.clipPackage.openDriveFolder.useMutation();
 

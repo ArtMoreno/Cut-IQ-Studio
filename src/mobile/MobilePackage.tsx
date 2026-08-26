@@ -14,6 +14,7 @@ import {
   Square,
 } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { isPaymentRequired, openProDialog } from "@/lib/license";
 import {
   clipThumbnailSource,
   manifestClipDuration,
@@ -47,6 +48,7 @@ export default function MobilePackage() {
   const seedDraft = trpc.clipPackage.saveStudioHandoffDraft.useMutation();
   const queue = trpc.clipPackage.queueExport.useMutation({
     onSuccess: job => setExportId(job.id),
+    onError: error => { if (isPaymentRequired(error)) openProDialog("Package export"); },
   });
   const [lane, setLane] = useState<"plays" | "soundbites" | "copies" | "all">(
     "plays"

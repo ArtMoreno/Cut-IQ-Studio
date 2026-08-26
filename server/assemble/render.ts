@@ -14,7 +14,7 @@ import { probeMedia } from "../clip/mediaProbe";
 import { segmentsToSrt } from "./captions";
 import { CLIPS_DIR, FFMPEG_PATH as FFMPEG } from "../runtimePaths";
 
-const EXPORT_ROOT = process.env.ASSEMBLE_EXPORT_ROOT || join(CLIPS_DIR, "csc_jobs", ".assemble-exports");
+const EXPORT_ROOT = process.env.ASSEMBLE_EXPORT_ROOT || join(CLIPS_DIR, "pipeline_jobs", ".assemble-exports");
 
 // ── Pure filter construction (unit-testable) ───────────────────────────────
 

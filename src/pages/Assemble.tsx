@@ -93,11 +93,11 @@ function ProjectList({ onOpen }: { onOpen: (id: number) => void }) {
   });
 
   const [name, setName] = useState("");
-  const [preset, setPreset] = useState<"csc-vertical" | "youtube-16x9" | "square">("csc-vertical");
-  const [sourceKind, setSourceKind] = useState<"none" | "project" | "csc">("none");
+  const [preset, setPreset] = useState<"vertical-9x16" | "youtube-16x9" | "square">("vertical-9x16");
+  const [sourceKind, setSourceKind] = useState<"none" | "project" | "job">("none");
   const [sourceProjectFk, setSourceProjectFk] = useState<number | undefined>(undefined);
-  const [sourceCscSlug, setSourceCscSlug] = useState<string | undefined>(undefined);
-  const cscJobs = trpc.assemble.listCscJobs.useQuery();
+  const [sourceJobSlug, setSourceJobSlug] = useState<string | undefined>(undefined);
+  const pipelineJobs = trpc.assemble.listPipelineJobs.useQuery();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +106,7 @@ function ProjectList({ onOpen }: { onOpen: (id: number) => void }) {
       name: name.trim(),
       preset,
       sourceProjectFk: sourceKind === "project" ? sourceProjectFk : undefined,
-      sourceCscSlug: sourceKind === "csc" ? sourceCscSlug : undefined,
+      sourceJobSlug: sourceKind === "job" ? sourceJobSlug : undefined,
     });
   };
 
@@ -151,14 +151,14 @@ function ProjectList({ onOpen }: { onOpen: (id: number) => void }) {
           <div>
             <label className="mb-1 block text-xs font-medium text-zinc-400">Output preset</label>
             <div className="flex gap-2">
-              {(["csc-vertical", "youtube-16x9", "square"] as const).map((p) => (
+              {(["vertical-9x16", "youtube-16x9", "square"] as const).map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => setPreset(p)}
                   className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium ${preset === p ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-700 text-zinc-400 hover:text-zinc-200"}`}
                 >
-                  {p === "csc-vertical" ? "9:16" : p === "youtube-16x9" ? "16:9" : "1:1"}
+                  {p === "vertical-9x16" ? "9:16" : p === "youtube-16x9" ? "16:9" : "1:1"}
                 </button>
               ))}
             </div>
@@ -169,7 +169,7 @@ function ProjectList({ onOpen }: { onOpen: (id: number) => void }) {
               {([
                 ["none", "None"],
                 ["project", "Script job"],
-                ["csc", "CSC folder"],
+                ["job", "pipeline folder"],
               ] as const).map(([kind, label]) => (
                 <button
                   key={kind}
@@ -193,14 +193,14 @@ function ProjectList({ onOpen }: { onOpen: (id: number) => void }) {
                 ))}
               </select>
             )}
-            {sourceKind === "csc" && (
+            {sourceKind === "job" && (
               <select
-                value={sourceCscSlug ?? ""}
-                onChange={(e) => setSourceCscSlug(e.target.value || undefined)}
+                value={sourceJobSlug ?? ""}
+                onChange={(e) => setSourceJobSlug(e.target.value || undefined)}
                 className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-emerald-500"
               >
-                <option value="">— choose CSC job folder —</option>
-                {(cscJobs.data ?? []).map((slug) => (
+                <option value="">— choose pipeline job folder —</option>
+                {(pipelineJobs.data ?? []).map((slug) => (
                   <option key={slug} value={slug}>{slug}</option>
                 ))}
               </select>
@@ -245,7 +245,7 @@ function Editor({ projectId, onExit }: { projectId: number; onExit: () => void }
       projectId={projectId}
       initialDoc={open.data.doc}
       sourceProjectFk={open.data.sourceProjectFk ?? null}
-      sourceCscSlug={open.data.sourceCscSlug ?? null}
+      sourceJobSlug={open.data.sourceJobSlug ?? null}
       onExit={onExit}
     />
   );
@@ -255,13 +255,13 @@ function EditorLoaded({
   projectId,
   initialDoc,
   sourceProjectFk,
-  sourceCscSlug,
+  sourceJobSlug,
   onExit,
 }: {
   projectId: number;
   initialDoc: AssembleDoc;
   sourceProjectFk: number | null;
-  sourceCscSlug: string | null;
+  sourceJobSlug: string | null;
   onExit: () => void;
 }) {
   const save = trpc.assemble.save.useMutation();
@@ -300,13 +300,13 @@ function EditorLoaded({
   const manifestQuery = trpc.assemble.manifest.useQuery(
     sourceProjectFk != null ? { sourceProjectId: sourceProjectFk, renderedOnly: true } : skipToken,
   );
-  const cscManifestQuery = trpc.assemble.cscManifest.useQuery(
-    sourceCscSlug != null ? { slug: sourceCscSlug } : skipToken,
+  const pipelineManifestQuery = trpc.assemble.pipelineManifest.useQuery(
+    sourceJobSlug != null ? { slug: sourceJobSlug } : skipToken,
   );
   const exportLocationsQuery = trpc.assemble.listExportLocations.useQuery(
-    sourceCscSlug != null ? { slug: sourceCscSlug } : {},
+    sourceJobSlug != null ? { slug: sourceJobSlug } : {},
   );
-  const manifest = (sourceCscSlug != null ? cscManifestQuery.data : manifestQuery.data) ?? null;
+  const manifest = (sourceJobSlug != null ? pipelineManifestQuery.data : manifestQuery.data) ?? null;
 
   const persist = useCallback(
     (next: AssembleDoc) => {

@@ -15,7 +15,8 @@ import { getDb } from "./queries/connection";
 import { assembleAutosaves, assembleProjects } from "@db/schema";
 import { defaultDoc, parseAssembleDoc, type PresetId } from "./assemble/project";
 import { buildProjectManifest } from "./assemble/manifest";
-import { harvestCscJob, listCscJobSlugs } from "./assemble/cscHarvest";
+import { harvestPipelineJob, listPipelineJobSlugs } from "./assemble/pipelineHarvest";
+import { CLIPS_DIR } from "./runtimePaths";
 import { beatsFromScript, alignBeatsToNarration } from "./assemble/beatAnalysis";
 import { renderProject } from "./assemble/render";
 import { rankClipsForBeat } from "./assemble/match";
@@ -34,7 +35,7 @@ export const assembleRouter = createRouter({
       preset: p.preset,
       status: p.status,
       sourceProjectFk: p.sourceProjectFk ? Number(p.sourceProjectFk) : null,
-      sourceCscSlug: p.sourceCscSlug ?? null,
+      sourceJobSlug: p.sourceJobSlug ?? null,
       updatedAt: p.updatedAt,
     }));
   }),
@@ -43,9 +44,9 @@ export const assembleRouter = createRouter({
     .input(
       z.object({
         name: z.string().min(1),
-        preset: z.enum(["csc-vertical", "youtube-16x9", "square"]).default("csc-vertical"),
+        preset: z.enum(["vertical-9x16", "youtube-16x9", "square"]).default("vertical-9x16"),
         sourceProjectFk: z.number().optional(),
-        sourceCscSlug: z.string().optional(),
+        sourceJobSlug: z.string().optional(),
         scriptText: z.string().nullable().optional(),
       }),
     )
@@ -57,7 +58,7 @@ export const assembleRouter = createRouter({
         .values({
           name: input.name,
           sourceProjectFk: input.sourceProjectFk ?? null,
-          sourceCscSlug: input.sourceCscSlug ?? null,
+          sourceJobSlug: input.sourceJobSlug ?? null,
           doc: JSON.stringify(doc),
           preset: input.preset,
           status: "draft",
@@ -76,7 +77,7 @@ export const assembleRouter = createRouter({
       preset: project.preset,
       status: project.status,
       sourceProjectFk: project.sourceProjectFk ? Number(project.sourceProjectFk) : null,
-      sourceCscSlug: project.sourceCscSlug ?? null,
+      sourceJobSlug: project.sourceJobSlug ?? null,
       doc: parseAssembleDoc(JSON.parse(project.doc), project.name),
     };
   }),
@@ -146,14 +147,14 @@ export const assembleRouter = createRouter({
       return buildProjectManifest(input.sourceProjectId, { renderedOnly: input.renderedOnly });
     }),
 
-  // List the automation pipeline's CSC job folders (the real production output).
-  listCscJobs: publicQuery.query(() => listCscJobSlugs()),
+  // List the automation pipeline's pipeline job folders (the real production output).
+  listPipelineJobs: publicQuery.query(() => listPipelineJobSlugs()),
 
-  // Derive a manifest from an on-disk CSC job folder (03_clips/best + render list).
-  cscManifest: publicQuery
+  // Derive a manifest from an on-disk pipeline job folder (03_clips/best + render list).
+  pipelineManifest: publicQuery
     .input(z.object({ slug: z.string().min(1) }))
     .query(async ({ input }) => {
-      return harvestCscJob(input.slug);
+      return harvestPipelineJob(input.slug);
     }),
 
   updateStatus: publicQuery
@@ -269,10 +270,10 @@ export const assembleRouter = createRouter({
     .query(({ input }) => {
       const locations: Array<{ label: string; path: string }> = [];
       if (input.slug) {
-        locations.push({ label: "Job exports folder (recommended)", path: `D:/Clips/csc_jobs/${input.slug}/assemble/exports` });
+        locations.push({ label: "Job exports folder (recommended)", path: `${CLIPS_DIR}/pipeline_jobs/${input.slug}/assemble/exports` });
       }
       locations.push(
-        { label: "All Assemble exports", path: "D:/Clips/csc_jobs/.assemble-exports" },
+        { label: "All Assemble exports", path: `${CLIPS_DIR}/pipeline_jobs/.assemble-exports` },
         { label: "Clips root", path: "D:/Clips" },
       );
       return locations;

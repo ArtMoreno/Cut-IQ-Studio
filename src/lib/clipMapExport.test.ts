@@ -6,7 +6,7 @@ import { clipMapCSV, clipMapJSON, clipMapMarkdown } from "./clipMapExport";
 
 const project = {
   id: 1,
-  name: "2026-08-07__CSC__Test-Topic",
+  name: "2026-08-07__JOB__Test-Topic",
   status: "ready_for_review",
   currentRevision: 2,
   sourceTitle: "Test Doc",
@@ -78,7 +78,7 @@ describe("clip map exports", () => {
 
   it("Markdown groups candidates under their beats", () => {
     const md = clipMapMarkdown(project, beats, candidates);
-    expect(md).toContain("# Clip Map — 2026-08-07__CSC__Test-Topic");
+    expect(md).toContain("# Clip Map — 2026-08-07__JOB__Test-Topic");
     expect(md.indexOf("Beat 1")).toBeLessThan(md.indexOf("Beat 2"));
     expect(md).toContain("@ 0:42");
     expect(md).toContain("revision 2");

@@ -38,7 +38,7 @@ function baseIngress(scriptText: string) {
   return {
     sourceProvider: "google_docs",
     sourceDocId: DOC_ID,
-    sourceTitle: `CSC Test Doc ${RUN}`,
+    sourceTitle: `Pipeline Test Doc ${RUN}`,
     sourceUrl: `https://docs.google.com/document/d/${DOC_ID}/edit`,
     sourceModifiedAt: "2026-08-07T12:00:00Z",
     scriptText,
@@ -64,7 +64,7 @@ describe("script ingress (requirement 2, 3, 4)", () => {
     expect(res.isNewProject).toBe(true);
     expect(res.revision).toBe(1);
     expect(res.status).toBe("imported");
-    expect(res.name).toContain("CSC");
+    expect(res.name).toContain("JOB");
   });
 
   it("resubmitting the unchanged script does NOT duplicate the project", async () => {
@@ -106,9 +106,9 @@ describe("script ingress (requirement 2, 3, 4)", () => {
     expect(scriptHash("a")).not.toBe(scriptHash("b"));
   });
 
-  it("default naming follows YYYY-MM-DD__CSC__TOPIC", () => {
+  it("default naming follows YYYY-MM-DD__JOB__TOPIC", () => {
     const name = defaultProjectName("Elijah Lofton", undefined);
-    expect(name).toMatch(/^\d{4}-\d{2}-\d{2}__CSC__Elijah-Lofton$/);
+    expect(name).toMatch(/^\d{4}-\d{2}-\d{2}__JOB__Elijah-Lofton$/);
     expect(defaultProjectName("x", "My Custom Name")).toBe("My Custom Name");
   });
 });

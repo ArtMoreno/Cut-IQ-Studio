@@ -149,7 +149,7 @@ control.get("/projects", async (c) => {
   return c.json({ ok: true, projects: rows });
 });
 
-// Stable, agent-independent Find Clips controller. The desktop UI and every
+// Stable, caller-independent Find Clips controller. The desktop UI and every
 // operator use these same durable jobs; the HTTP request never supervises the
 // production pipeline after creation.
 control.post("/job/create", async (c) => {

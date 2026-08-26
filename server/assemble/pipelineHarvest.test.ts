@@ -6,7 +6,7 @@ import {
   parseClipManifestCsv,
   parseBeatMapCsv,
   parseTimecode,
-} from "./cscHarvest";
+} from "./pipelineHarvest";
 
 const SAMPLE = `# Best Fletcher power/explosive clips selected from 265 candidates
 # Format: video_id | game_label | in_sec | out_sec | duration | description
@@ -52,8 +52,8 @@ describe("gameFromCode", () => {
 // Format B: 00_job/clip_manifest.csv (malachi-toney-yac-2025 style)
 
 const MANIFEST_CSV = `clip_id,beat_id,source_url,source_title,source_video_id,source_resolution,in_tc,out_tc,player,team,season,opponent,linked_beat,identity_verified,action_verified,season_verified,quality_verified,local_path,upload_status,drive_file_id,size_bytes,rights_note
-01_nd_td_toney,yac-nd,https://www.youtube.com/watch?v=pH-45Dz3tzg,Notre Dame vs Miami,ND-video36,1080p,00:58:40,00:59:35,Malachi Toney,Miami,2025,Notre Dame,yac-nd,true,true,true,true,D:/Clips/csc_jobs/malachi-toney-yac-2025/03_clips/best/01_nd_td_toney.mp4,pending,,,"ACC Digital Network broadcast"
-07_lou_62yd_catch_and_run,yac-lou,https://www.youtube.com/watch?v=abc12345678,Louisville vs Miami,LOU-video1,1080p,01:10:00,01:11:02,Malachi Toney,Miami,2025,Louisville,yac-lou,true,true,true,true,D:/Clips/csc_jobs/malachi-toney-yac-2025/03_clips/best/07_lou_62yd_catch_and_run.mp4,uploaded,file123,9876543,"ACC Digital Network broadcast"
+01_nd_td_toney,yac-nd,https://www.youtube.com/watch?v=pH-45Dz3tzg,Notre Dame vs Miami,ND-video36,1080p,00:58:40,00:59:35,Malachi Toney,Miami,2025,Notre Dame,yac-nd,true,true,true,true,D:/Clips/pipeline_jobs/malachi-toney-yac-2025/03_clips/best/01_nd_td_toney.mp4,pending,,,"ACC Digital Network broadcast"
+07_lou_62yd_catch_and_run,yac-lou,https://www.youtube.com/watch?v=abc12345678,Louisville vs Miami,LOU-video1,1080p,01:10:00,01:11:02,Malachi Toney,Miami,2025,Louisville,yac-lou,true,true,true,true,D:/Clips/pipeline_jobs/malachi-toney-yac-2025/03_clips/best/07_lou_62yd_catch_and_run.mp4,uploaded,file123,9876543,"ACC Digital Network broadcast"
 `;
 
 describe("parseCsv", () => {

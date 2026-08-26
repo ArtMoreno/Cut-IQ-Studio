@@ -1,6 +1,6 @@
 /**
- * CSC job folder harvest — read the automation pipeline's on-disk output
- * (D:\Clips\csc_jobs\<slug>) into a clip manifest.
+ * pipeline job folder harvest — read the automation pipeline's on-disk output
+ * (D:\Clips\pipeline_jobs\<slug>) into a clip manifest.
  *
  * Two on-disk formats exist in Art's production jobs:
  *   A. `clips_to_render.txt` at the job root (mark-fletcher-jr-power-2025)
@@ -21,7 +21,7 @@ import type { ClipManifest, ManifestClip } from "./manifest";
 import { clipDownloadUrl } from "./manifest";
 import { probeMedia } from "../clip/mediaProbe";
 
-const CSC_JOBS_ROOT = process.env.CSC_JOBS_ROOT || "D:/Clips/csc_jobs";
+const PIPELINE_JOBS_ROOT = process.env.PIPELINE_JOBS_ROOT || "D:/Clips/pipeline_jobs";
 
 export interface ParsedClipLine {
   code: string;
@@ -209,9 +209,9 @@ export function parseTimecode(tc: string): number | null {
   return sec;
 }
 
-/** List available CSC job slugs (directories with a `00_job` folder). */
-export function listCscJobSlugs(): string[] {
-  const root = resolve(CSC_JOBS_ROOT);
+/** List available pipeline job slugs (directories with a `00_job` folder). */
+export function listPipelineJobSlugs(): string[] {
+  const root = resolve(PIPELINE_JOBS_ROOT);
   if (!existsSync(root)) return [];
   return readdirSync(root, { withFileTypes: true })
     .filter((e) => e.isDirectory() && existsSync(join(root, e.name, "00_job")))
@@ -244,13 +244,13 @@ export function gameFromCode(code: string): string | null {
   return map[base] ?? null;
 }
 
-export interface CscHarvestOptions {
+export interface PipelineHarvestOptions {
   probeMedia?: boolean; // probe each mp4 for resolution/duration (default true)
 }
 
-export async function harvestCscJob(slug: string, opts: CscHarvestOptions = {}): Promise<ClipManifest> {
+export async function harvestPipelineJob(slug: string, opts: PipelineHarvestOptions = {}): Promise<ClipManifest> {
   const probe = opts.probeMedia ?? true;
-  const jobDir = resolve(CSC_JOBS_ROOT, slug);
+  const jobDir = resolve(PIPELINE_JOBS_ROOT, slug);
   const clipsDir = resolve(jobDir, "03_clips", "best");
   const specPath = join(jobDir, "00_job", "JOB_SPEC.md");
   const statePath = join(jobDir, "00_job", "JOB_STATE.json");
@@ -258,7 +258,7 @@ export async function harvestCscJob(slug: string, opts: CscHarvestOptions = {}):
   const manifestCsvPath = join(jobDir, "00_job", "clip_manifest.csv");
   const beatMapPath = join(jobDir, "00_job", "beat_map.csv");
 
-  if (!existsSync(jobDir)) throw new Error(`CSC job "${slug}" not found.`);
+  if (!existsSync(jobDir)) throw new Error(`pipeline job "${slug}" not found.`);
 
   const spec = existsSync(specPath) ? readFileSync(specPath, "utf8") : "";
   const subject = jobSpecField(spec, "Subject") ?? jobSpecField(spec, "Topic") ?? slug;
@@ -332,7 +332,7 @@ async function harvestFromRenderList(
     const probed = await maybeProbe(probe, localPath);
     const game = p.game ?? gameFromCode(p.code);
     clips.push({
-      clipId: `csc-${slug}-${i + 1}`,
+      clipId: `job-${slug}-${i + 1}`,
       candidateId: 0,
       beatOrd: i,
       beatText: "",
@@ -405,7 +405,7 @@ async function harvestFromManifestCsv(
     const clipWords = r.clipId.replace(/\d+_/g, "").replace(/[_-]+/g, " ").trim();
 
     clips.push({
-      clipId: `csc-${slug}-${++ord}`,
+      clipId: `job-${slug}-${++ord}`,
       candidateId: 0,
       beatOrd: ord - 1,
       beatText: beat?.scriptLine ?? "",
@@ -453,7 +453,7 @@ async function harvestFromDirectory(slug: string, clipsDir: string, files: strin
     const localPath = join(clipsDir, f);
     const probed = await maybeProbe(probe, localPath);
     clips.push({
-      clipId: `csc-${slug}-${++ord}`,
+      clipId: `job-${slug}-${++ord}`,
       candidateId: 0,
       beatOrd: ord - 1,
       beatText: "",

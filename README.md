@@ -19,6 +19,28 @@
 
 Cut IQ keeps project metadata in a local MariaDB instance and finished media in your Videos folder. The server binds to `127.0.0.1`; it is not exposed to your LAN or the public internet. Google Drive support is optional and off by default.
 
+## Free and Pro
+
+Cutting is free forever. Pro is a one-time purchase that unlocks the batch and
+delivery work, with no subscription and no account.
+
+| | Free | Pro - $29.99 once |
+| --- | --- | --- |
+| Find Clips projects and review | Yes | Yes |
+| Manual Clip Studio | Yes | Yes |
+| Render a single clip or moment | Yes | Yes |
+| Assemble projects and local export | Yes | Yes |
+| Batch render a whole project | - | Yes |
+| Batch render every moment on a video | - | Yes |
+| Clip package export | - | Yes |
+| Broadcast soundbites | - | Yes |
+| Drive sync | - | Yes |
+
+[Get Pro](https://artjmoreno.gumroad.com/l/cut-iq-studio-pro). Keys are verified
+on your machine against a public key compiled into the app. Activating one does
+not contact a server, create an account, or send anything about your projects
+anywhere. Keys are issued by hand today, so allow a few hours after buying.
+
 ## Install on Windows
 
 1. Download **Cut-IQ-Studio-Setup.exe** from the [latest release](https://github.com/ArtMoreno/Cut-IQ-Studio/releases/latest).

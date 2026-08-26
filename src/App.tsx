@@ -6,10 +6,14 @@ import LegacyAssembleRedirect from './pages/LegacyAssembleRedirect'
 import Diagnostics from './pages/Diagnostics'
 import NewFindClipsJob from './pages/NewFindClipsJob'
 import MobileApp from './mobile/MobileApp'
+import { ProDialog } from './components/ProDialog'
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      {/* Mounted above the routes so any gated control can open it. */}
+      <ProDialog />
+      <Routes>
       <Route path="/m/*" element={<MobileApp />} />
       <Route path="/" element={<Home />} />
       <Route path="/new-job" element={<NewFindClipsJob />} />
@@ -21,6 +25,7 @@ export default function App() {
       <Route path="/video" element={<Navigate to="/transcript-studio" replace />} />
       <Route path="/transcript" element={<Navigate to="/transcript-studio" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }

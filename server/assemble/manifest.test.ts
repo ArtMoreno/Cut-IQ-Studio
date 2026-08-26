@@ -131,7 +131,7 @@ describe("deriveSubject", () => {
   it("derives a person + team + season from what Cut IQ already holds", () => {
     const s = deriveSubject({
       topic: "Mark Fletcher Jr. power running",
-      name: "2026-08-13__CSC__mark-fletcher-jr-power-2025",
+      name: "2026-08-13__JOB__mark-fletcher-jr-power-2025",
       entities: ["Mark Fletcher Jr."],
       scriptText: "Mark Fletcher Jr. ran through the Miami defense in 2025.",
     });

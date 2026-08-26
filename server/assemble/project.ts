@@ -13,7 +13,7 @@
 export const ASSEMBLE_DOC_SCHEMA_VERSION = 1;
 
 export type Track = "V1" | "V2" | "A1" | "A2" | "A3";
-export type PresetId = "csc-vertical" | "youtube-16x9" | "square";
+export type PresetId = "vertical-9x16" | "youtube-16x9" | "square";
 export type ClipSourceMode = "action" | "replay" | "full-play" | "generic";
 
 export interface SequenceSettings {
@@ -24,7 +24,7 @@ export interface SequenceSettings {
 }
 
 export const PRESETS: Record<PresetId, SequenceSettings> = {
-  "csc-vertical": { width: 1080, height: 1920, fps: 30, preset: "csc-vertical" },
+  "vertical-9x16": { width: 1080, height: 1920, fps: 30, preset: "vertical-9x16" },
   "youtube-16x9": { width: 1920, height: 1080, fps: 30, preset: "youtube-16x9" },
   square: { width: 1080, height: 1080, fps: 30, preset: "square" },
 };
@@ -88,7 +88,7 @@ export interface AssembleDoc {
   locked: { noReuse: boolean; preferredGame: string | null };
 }
 
-export function defaultDoc(name: string, preset: PresetId = "csc-vertical", scriptText: string | null = null): AssembleDoc {
+export function defaultDoc(name: string, preset: PresetId = "vertical-9x16", scriptText: string | null = null): AssembleDoc {
   return {
     schemaVersion: ASSEMBLE_DOC_SCHEMA_VERSION,
     name,
@@ -111,7 +111,7 @@ export function parseAssembleDoc(raw: unknown, name: string): AssembleDoc {
   if (!Array.isArray(doc.beats) || !Array.isArray(doc.items)) {
     throw new Error("Assemble project is missing its beats or timeline.");
   }
-  const preset: PresetId = doc.settings?.preset && doc.settings.preset in PRESETS ? doc.settings.preset : "csc-vertical";
+  const preset: PresetId = doc.settings?.preset && doc.settings.preset in PRESETS ? doc.settings.preset : "vertical-9x16";
   return {
     ...defaultDoc(name, preset, doc.scriptText ?? null),
     ...doc,

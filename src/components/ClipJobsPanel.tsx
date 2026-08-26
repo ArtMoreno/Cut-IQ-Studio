@@ -5,6 +5,7 @@
  */
 import { useRef, useState } from "react";
 import { trpc } from "@/providers/trpc";
+import { isPaymentRequired, openProDialog } from "@/lib/license";
 import { fmtTime } from "@/lib/youtube";
 import { normalizeYouTubeUrl } from "@/lib/transcriptStudio";
 import { Player, type PlayerHandle } from "@/components/Player";
@@ -279,8 +280,16 @@ export function ClipJobsPanel({ projectFk, videoFk, compact }: Props) {
   const ready = canonical.filter((j) => j.status === "ready");
   const failed = canonical.filter((j) => j.status === "failed");
 
-  const renderAll = trpc.clips.renderProject.useMutation({ onSuccess: () => utils.clips.listJobs.invalidate() });
-  const renderVideo = trpc.clips.renderVideoMoments.useMutation({ onSuccess: () => utils.clips.listJobs.invalidate() });
+  // A gated batch render explains itself by opening the Pro dialog rather than
+  // surfacing a raw PAYMENT_REQUIRED error.
+  const renderAll = trpc.clips.renderProject.useMutation({
+    onSuccess: () => utils.clips.listJobs.invalidate(),
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Batch render"); },
+  });
+  const renderVideo = trpc.clips.renderVideoMoments.useMutation({
+    onSuccess: () => utils.clips.listJobs.invalidate(),
+    onError: (error) => { if (isPaymentRequired(error)) openProDialog("Batch render"); },
+  });
 
   const doExportAll = () => {
     if (renderAll.isPending || renderVideo.isPending) return;

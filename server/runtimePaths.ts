@@ -3,8 +3,8 @@ import { homedir } from "node:os";
 
 /**
  * Cut IQ owns its production runtime under the installation root. Operators
- * may override individual paths, but defaults never point into another app or
- * agent installation.
+ * may override individual paths, but defaults never point into another
+ * application's installation.
  */
 export const CLIPSIFT_APP_ROOT = resolve(process.env.CLIPSIFT_APP_ROOT || process.cwd());
 export const CLIPSIFT_INSTALL_ROOT = resolve(process.env.CLIPSIFT_INSTALL_ROOT || join(CLIPSIFT_APP_ROOT, ".."));

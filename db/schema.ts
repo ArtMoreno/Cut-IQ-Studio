@@ -177,7 +177,7 @@ export const searchHistory = mysqlTable("search_history", {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// Script / Project mode (CSC script → clip map). Additive only —
+// Script / Project mode (pipeline script → clip map). Additive only —
 // the Single Video tables above are unchanged.
 // ══════════════════════════════════════════════════════════════════
 
@@ -384,9 +384,9 @@ export const assembleProjects = mysqlTable("assemble_projects", {
   id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   sourceProjectFk: bigint("source_project_fk", { mode: "number", unsigned: true }), // optional link to script_projects
-  sourceCscSlug: varchar("source_csc_slug", { length: 255 }), // optional link to a CSC job folder under D:\Clips\csc_jobs
+  sourceJobSlug: varchar("source_job_slug", { length: 255 }), // optional link to a pipeline job folder under the clips directory
   doc: text("doc").notNull(), // JSON: AssembleDoc (schemaVersion, beats, items, settings, narration)
-  preset: varchar("preset", { length: 32 }).notNull().default("csc-vertical"),
+  preset: varchar("preset", { length: 32 }).notNull().default("vertical-9x16"),
   status: varchar("status", { length: 40 }).notNull().default("draft"), // draft | assembled | rendering | rendered | failed
   renderLog: text("render_log"), // JSON array of {at, ok, message}
   createdAt: timestamp("created_at").notNull().defaultNow(),

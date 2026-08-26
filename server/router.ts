@@ -6,6 +6,7 @@ import { transcriptStudioRouter } from "./transcriptStudioRouter";
 import { assembleRouter } from "./assembleRouter";
 import { findClipsRouter } from "./findClipsRouter";
 import { clipPackageRouter } from "./clipPackageRouter";
+import { licenseRouter } from "./licenseRouter";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
@@ -16,6 +17,7 @@ export const appRouter = createRouter({
   assemble: assembleRouter,
   findClips: findClipsRouter,
   clipPackage: clipPackageRouter,
+  license: licenseRouter,
 });
 
 export type AppRouter = typeof appRouter;

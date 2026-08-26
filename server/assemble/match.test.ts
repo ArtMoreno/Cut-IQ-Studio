@@ -24,7 +24,7 @@ function beat(over: Partial<AssembleBeat> = {}): AssembleBeat {
 
 function clip(over: Partial<ManifestClip> = {}): ManifestClip {
   return {
-    clipId: "csc-1",
+    clipId: "job-1",
     candidateId: 0,
     beatOrd: 0,
     beatText: "",
@@ -96,15 +96,15 @@ describe("scoreClipForBeat — §49 no-false-visual gate", () => {
 
   it("penalizes an already-used clip", () => {
     const b = beat({ text: "Against Louisville, he broke the first tackle." });
-    const r = scoreClipForBeat(b, clip(), { usedClipIds: new Set(["csc-1"]) });
+    const r = scoreClipForBeat(b, clip(), { usedClipIds: new Set(["job-1"]) });
     expect(r.components.duplicatePenalty).toBe(-1);
   });
 });
 
 describe("autoAssemble — §45 real-clip honesty", () => {
   const louBeat = beat({ id: "beat-2", ord: 2, text: "Against Louisville, he turned a short completion into an explosive gain.", narrationStart: 8, narrationEnd: 14 });
-  const louClip = clip({ clipId: "csc-lou", game: "Louisville" });
-  const ndClip = clip({ clipId: "csc-nd", game: "Notre Dame", sourceStartSeconds: 30, sourceEndSeconds: 38 });
+  const louClip = clip({ clipId: "job-lou", game: "Louisville" });
+  const ndClip = clip({ clipId: "job-nd", game: "Notre Dame", sourceStartSeconds: 30, sourceEndSeconds: 38 });
 
   it("places a matching Louisville clip on the beat that names Louisville, using the action window", () => {
     const result = autoAssemble([louBeat], [louClip, ndClip]);
@@ -112,13 +112,13 @@ describe("autoAssemble — §45 real-clip honesty", () => {
     expect(placed.length).toBe(1);
     const louItem = placed.find((i) => i.beatId === "beat-2");
     expect(louItem).toBeDefined();
-    expect(louItem!.clipId).toBe("csc-lou");
+    expect(louItem!.clipId).toBe("job-lou");
     expect(louItem!.sourceIn).toBe(14.2); // uses the action window, not clip start
   });
 
   it("hard-blocks the wrong game even when other clips are available", () => {
     // Beat names Louisville; only a Notre Dame clip exists → honest placeholder.
-    const nd = clip({ clipId: "csc-nd", game: "Notre Dame", opponent: "Notre Dame", transcript: { text: "Notre Dame defense", segmentStart: null, segmentEnd: null }, sourceStartSeconds: 30, sourceEndSeconds: 38 });
+    const nd = clip({ clipId: "job-nd", game: "Notre Dame", opponent: "Notre Dame", transcript: { text: "Notre Dame defense", segmentStart: null, segmentEnd: null }, sourceStartSeconds: 30, sourceEndSeconds: 38 });
     const result = autoAssemble([louBeat], [nd]);
     expect(result.items.length).toBe(1);
     expect(result.items[0].unresolved).toBe(true);
@@ -126,11 +126,11 @@ describe("autoAssemble — §45 real-clip honesty", () => {
   });
 
   it("accepts a clip whose provenance names the team even when the opponent field does not (Miami bug)", () => {
-    // Real CSC shape: game/opponent hold the OPPONENT, the player's own team
+    // Real pipeline shape: game/opponent hold the OPPONENT, the player's own team
     // (Miami) appears only in the source title inside transcript text.
     const miamiBeat = beat({ id: "b-mia", ord: 0, text: "Last year Miami handed him the burden of moving the offense.", narrationStart: 0, narrationEnd: 6 });
     const ndVsMiami = clip({
-      clipId: "csc-nd-vs-mia",
+      clipId: "job-nd-vs-mia",
       game: "Notre Dame",
       opponent: "Notre Dame",
       transcript: { text: "01 nd td toney — Notre Dame vs Miami", segmentStart: null, segmentEnd: null },

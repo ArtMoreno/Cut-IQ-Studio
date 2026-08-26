@@ -1,5 +1,5 @@
 /**
- * Script analysis: break CSC narration into ordered visual beats with
+ * Script analysis: break pipeline narration into ordered visual beats with
  * entities, coverage needs, and budgeted search queries.
  *
  * Pure functions only — no I/O — so they are fully unit-testable.

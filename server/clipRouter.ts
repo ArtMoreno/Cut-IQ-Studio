@@ -4,7 +4,7 @@
  */
 import { z } from "zod";
 import { desc, eq, inArray } from "drizzle-orm";
-import { createRouter, publicQuery } from "./middleware";
+import { createRouter, proProcedure, publicQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import { clipCandidates, clipJobs, findJobs, moments, scriptBeats, videos } from "@db/schema";
 import { cancelRunningJob, enqueueClip, clipConfig, recoverStaleJobs, wake } from "./clip/engine";
@@ -76,7 +76,9 @@ export const clipRouter = createRouter({
     }),
 
   // Render every eligible candidate of a project (all, or only approved).
-  renderProject: publicQuery
+  // Pro: renders every candidate in a project in one pass. Single-clip renders
+  // stay free, so the free tier is a working tool rather than a demo.
+  renderProject: proProcedure
     .input(
       z.object({
         projectId: z.number(),
@@ -120,7 +122,8 @@ export const clipRouter = createRouter({
     }),
 
   // Render every moment of a video (used by Single Video mode export-all).
-  renderVideoMoments: publicQuery
+  // Pro: batch-renders every saved moment on a video.
+  renderVideoMoments: proProcedure
     .input(
       z.object({
         videoDbId: z.number(),
