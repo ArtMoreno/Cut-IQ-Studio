@@ -48,8 +48,12 @@ Expand-Archive -LiteralPath $mariaArchive -DestinationPath $expanded -Force
 $mariaSource = Get-ChildItem -LiteralPath $expanded -Directory -Filter "mariadb-11.4.5-winx64" | Select-Object -First 1
 Copy-Item -LiteralPath $mariaSource.FullName -Destination (Join-Path $RuntimeRoot "mariadb") -Recurse
 
-$ffmpegArchive = Join-Path $cache "ffmpeg-n8.1-latest-win64-lgpl-8.1.zip"
-Save-Verified "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n8.1-latest-win64-lgpl-8.1.zip" $ffmpegArchive "6BCA537391351661682DAB0CED291971C61C20766FC7001A1DC42CF279202282"
+# Pinned to a dated autobuild tag, not `latest`. The `latest` tag is rolling:
+# upstream republishes it, the bytes change, and the pinned checksum fails a
+# build that never changed. This hash comes from the GitHub release asset
+# digest, not from a local download.
+$ffmpegArchive = Join-Path $cache "ffmpeg-n8.1.2-44-g7c533d0f86-win64-lgpl-8.1.zip"
+Save-Verified "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-25-13-06/ffmpeg-n8.1.2-44-g7c533d0f86-win64-lgpl-8.1.zip" $ffmpegArchive "1C0D36FB52EB7B4112950E7D2C7BF4BCD55876FEC590EAE81813F9B0E61CA7C0"
 Expand-Archive -LiteralPath $ffmpegArchive -DestinationPath $expanded -Force
 $ffmpegSource = Get-ChildItem -LiteralPath $expanded -Directory -Filter "ffmpeg-*" | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "bin\ffmpeg.exe") } | Select-Object -First 1
 $ffmpegTarget = Join-Path $RuntimeRoot "ffmpeg"
