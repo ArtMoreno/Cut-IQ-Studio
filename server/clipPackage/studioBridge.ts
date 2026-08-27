@@ -317,7 +317,7 @@ export async function saveStudioHandoffDraft(input: {
   if (video?.durationSec != null && input.editOut > video.durationSec + 0.25) {
     throw new Error("The OUT point is beyond the end of the source video.");
   }
-  const [result] = await getDb().update(clipPackageEditVersions).set({
+  const result = await getDb().update(clipPackageEditVersions).set({
     editIn: input.editIn,
     editOut: input.editOut,
   }).where(and(
@@ -328,7 +328,8 @@ export async function saveStudioHandoffDraft(input: {
     eq(clipPackageEditVersions.editOut, input.expectedEditOut),
     eq(clipPackageEditVersions.intent, input.expectedIntent),
   ));
-  if (result.affectedRows !== 1) {
+  // better-sqlite3 reports affected rows as `changes`.
+  if (result.changes !== 1) {
     throw new Error("This clip was changed on another device. Refresh before saving again.");
   }
   return studioHandoff(row.id);

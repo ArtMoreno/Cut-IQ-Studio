@@ -149,8 +149,8 @@ export const scriptRouter = createRouter({
         acquisitionStatus: "library",
         state: "approved",
         userNotes: moment.note,
-      });
-      const candidateId = Number(inserted[0].insertId);
+      }).returning({ id: clipCandidates.id });
+      const candidateId = Number(inserted[0].id);
       return { ok: true, candidateId, duplicate: false };
     }),
 

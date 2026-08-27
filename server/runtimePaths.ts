@@ -11,6 +11,14 @@ export const CLIPSIFT_INSTALL_ROOT = resolve(process.env.CLIPSIFT_INSTALL_ROOT |
 export const CLIPSIFT_RUNTIME_ROOT = resolve(process.env.CLIPSIFT_RUNTIME_DIR || join(CLIPSIFT_INSTALL_ROOT, "runtime"));
 export const CLIPS_DIR = resolve(process.env.CLIPS_DIR || join(homedir(), "Videos", "Cut IQ Studio", "Clips"));
 
+/**
+ * Project metadata lives in a single SQLite file beside the user's data rather
+ * than in a bundled database server.
+ */
+export const DATABASE_FILE = resolve(
+  process.env.CUTIQ_DATABASE_FILE || join(homedir(), ".cut-iq-studio", "cut-iq-studio.db"),
+);
+
 export const YTDLP_PATH = resolve(process.env.YTDLP_PATH || join(CLIPSIFT_RUNTIME_ROOT, "yt-dlp", "yt-dlp.exe"));
 export const FFMPEG_DIR = resolve(process.env.FFMPEG_DIR || join(CLIPSIFT_RUNTIME_ROOT, "ffmpeg"));
 export const FFMPEG_PATH = resolve(process.env.FFMPEG_PATH || join(FFMPEG_DIR, "ffmpeg.exe"));

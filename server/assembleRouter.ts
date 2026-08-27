@@ -63,7 +63,7 @@ export const assembleRouter = createRouter({
           preset: input.preset,
           status: "draft",
         })
-        .$returningId();
+        .returning({ id: assembleProjects.id });
       return { id: Number(ins.id) };
     }),
 

@@ -12,5 +12,5 @@ export const env = {
   appId: required("APP_ID"),
   appSecret: required("APP_SECRET"),
   isProduction: process.env.NODE_ENV === "production",
-  databaseUrl: required("DATABASE_URL"),
+  // The database is a local SQLite file; its path lives in runtimePaths.ts.
 };

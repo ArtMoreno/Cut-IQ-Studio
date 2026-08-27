@@ -780,7 +780,7 @@ async function ensureVideo(seed: SourceSeed): Promise<typeof videos.$inferSelect
           durationSec: Math.round(probe.durationSec),
           status: "ok",
         })
-        .$returningId();
+        .returning({ id: videos.id });
       [video] = await db.select().from(videos).where(eq(videos.id, inserted.id));
       return video!;
     }
@@ -795,7 +795,7 @@ async function ensureVideo(seed: SourceSeed): Promise<typeof videos.$inferSelect
         thumbnail: meta.thumbnail,
         status: "ok",
       })
-      .$returningId();
+      .returning({ id: videos.id });
     [video] = await db.select().from(videos).where(eq(videos.id, inserted.id));
   }
   return video!;
@@ -1244,7 +1244,8 @@ async function runCaptionFirst(job: typeof findJobs.$inferSelect): Promise<{ sou
         status: "metadata",
         attemptCount: 0,
       })
-      .onDuplicateKeyUpdate({
+      .onConflictDoUpdate({
+        target: [findSources.jobFk, findSources.videoId],
         set: {
           title: seed.title,
           channel: seed.channel,
@@ -1624,8 +1625,9 @@ export async function createFindJob(input: CreateFindJobInput): Promise<typeof f
       clipsVerified: 0,
       warnings: JSON.stringify([]),
     })
-    .onDuplicateKeyUpdate({
-      set: {
+    .onConflictDoUpdate({
+        target: findJobs.projectFk,
+        set: {
         player: input.player.trim(),
         team: input.team.trim(),
         season: input.season,

@@ -17,6 +17,10 @@ import { assertVerifiedClip, probeMedia } from "./mediaProbe";
 import { LOCAL_GOOGLE_DRIVE_ROOT, syncFinishedFindClip } from "./localDriveSync";
 import { CLIPS_DIR, FFMPEG_DIR, FFMPEG_PATH, YTDLP_PATH as YTDLP } from "../runtimePaths";
 import { localVideoPathFromUrl } from "../transcriptStudio/exportPaths";
+import { isPro } from "../license";
+
+/** Free installs cap rendered clips at 720p; Pro renders up to the source. */
+export const FREE_MAX_HEIGHT = 720;
 
 // ── Toolchain (Cut IQ-owned defaults; env-overridable) ───────────────────
 const RCLONE = process.env.RCLONE_PATH || "";
@@ -294,6 +298,10 @@ export async function enqueueClip(
   },
 ): Promise<typeof clipJobs.$inferSelect> {
   const db = getDb();
+  // Free installs render up to 720p. Enforced here rather than at the router so
+  // every path that queues a clip is covered, including the batch mutations.
+  const requestedHeight = input.height ?? FREE_MAX_HEIGHT;
+  const height = isPro() ? requestedHeight : Math.min(requestedHeight, FREE_MAX_HEIGHT);
   const [row] = await db
     .insert(clipJobs)
     .values({
@@ -307,14 +315,14 @@ export async function enqueueClip(
       fileName: null,
       editIn: Math.max(0, input.editIn),
       editOut: Math.max(input.editIn + 0.5, input.editOut),
-      height: input.height ?? 720,
-      minimumHeight: input.minimumHeight ?? 720,
+      height,
+      minimumHeight: Math.min(input.minimumHeight ?? FREE_MAX_HEIGHT, height),
       uploadToDrive: input.uploadToDrive ?? false,
       status: "queued",
       progress: 0,
       stage: "queued",
     })
-    .$returningId();
+    .returning({ id: clipJobs.id });
   const id = Number(row.id);
   const [created] = await db.select().from(clipJobs).where(eq(clipJobs.id, id));
   void pump(); // kick the worker (non-blocking)

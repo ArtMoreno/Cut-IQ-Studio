@@ -285,7 +285,7 @@ export async function analyzeYouTubeUrl(rawUrl: string): Promise<{ videoFk: numb
         thumbnail: meta.thumbnail,
         status: "ok",
       })
-      .$returningId();
+      .returning({ id: videos.id });
     [video] = await db.select().from(videos).where(eq(videos.id, inserted.id));
   }
   if (video.transcriptKind === "none") {

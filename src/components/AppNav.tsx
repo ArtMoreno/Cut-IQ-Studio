@@ -1,11 +1,11 @@
-import { Activity, Clapperboard, Menu, Scissors, Sparkles } from "lucide-react";
+import { Activity, CircleHelp, Clapperboard, Menu, Scissors, Sparkles } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import type { ReactNode } from "react";
 
 import { trpc } from "../providers/trpc";
 import { openProDialog } from "../lib/license";
 
-type AppArea = "find" | "studio" | "assemble" | "diagnostics";
+type AppArea = "find" | "studio" | "assemble" | "diagnostics" | "help";
 
 const primary = [
   { area: "find" as const, to: "/", label: "Find Clips", icon: Clapperboard },
@@ -61,6 +61,9 @@ export function AppNav({ active, actions }: { active: AppArea; actions?: ReactNo
 
         <div className="ml-auto hidden items-center gap-1 md:flex">
           <ProNavButton />
+          <NavLink to="/how-it-works" className={() => `inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 font-brand text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${active === "help" ? "bg-brand-500/10 text-brand-300" : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200"}`}>
+            <CircleHelp className="h-3.5 w-3.5" /> How it works
+          </NavLink>
           <NavLink to="/diagnostics" className={() => `inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 font-brand text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${active === "diagnostics" ? "bg-brand-500/10 text-brand-300" : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200"}`}>
             <Activity className="h-3.5 w-3.5" /> Diagnostics
           </NavLink>
@@ -75,6 +78,7 @@ export function AppNav({ active, actions }: { active: AppArea; actions?: ReactNo
               const Icon = item.icon;
               return <NavLink key={item.area} to={item.to} end={item.area === "find"} className={() => `${navClass(active === item.area)} w-full justify-start`}><Icon className="h-4 w-4" />{item.label}</NavLink>;
             })}
+            <NavLink to="/how-it-works" className={() => `${navClass(active === "help")} w-full justify-start`}><CircleHelp className="h-4 w-4" />How it works</NavLink>
             <NavLink to="/diagnostics" className={() => `${navClass(active === "diagnostics")} w-full justify-start`}><Activity className="h-4 w-4" />Diagnostics</NavLink>
             <button type="button" onClick={() => openProDialog()} className={`${navClass(false)} w-full justify-start`}><Sparkles className="h-4 w-4" />Get Pro</button>
           </nav>

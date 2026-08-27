@@ -422,7 +422,7 @@ async function queueStudioExport(input: {
     status: "queued",
     progress: 0,
     stage: "Queued",
-  }).$returningId();
+  }).returning({ id: transcriptStudioExports.id });
   const [record] = await db.select().from(transcriptStudioExports).where(eq(transcriptStudioExports.id, inserted.id));
   if (!record) throw new Error("Cut IQ could not create the manual export.");
   wakeStudioExportWorker();
@@ -449,7 +449,7 @@ async function registerLocalSource(input: { path: string; transcribe: boolean; r
       durationSec: Math.round(probe.durationSec),
       transcriptKind: "none",
       status: "ok",
-    }).$returningId();
+    }).returning({ id: videos.id });
     [video] = await db.select().from(videos).where(eq(videos.id, inserted.id));
   } else {
     await db.update(videos).set({

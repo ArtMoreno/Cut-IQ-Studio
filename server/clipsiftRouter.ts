@@ -168,7 +168,7 @@ export const clipsiftRouter = createRouter({
         const [inserted] = await db
           .insert(videos)
           .values({ videoId, url: canonical, title: meta.title, channel: meta.channel, thumbnail: meta.thumbnail, status: "ok" })
-          .$returningId();
+          .returning({ id: videos.id });
         [video] = await db.select().from(videos).where(eq(videos.id, inserted.id));
       } else {
         await db.update(videos).set({ lastOpenedAt: new Date() }).where(eq(videos.id, video.id));
@@ -340,7 +340,7 @@ export const clipsiftRouter = createRouter({
           excerpt: input.excerpt ?? null,
           color: input.color ?? "amber",
         })
-        .$returningId();
+        .returning({ id: moments.id });
       const [row] = await db.select().from(moments).where(eq(moments.id, r.id));
       return row;
     }),
@@ -436,7 +436,7 @@ export const clipsiftRouter = createRouter({
   createProject: publicQuery
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ input }) => {
-      const [r] = await getDb().insert(projects).values({ name: input.name }).$returningId();
+      const [r] = await getDb().insert(projects).values({ name: input.name }).returning({ id: projects.id });
       const [row] = await getDb().select().from(projects).where(eq(projects.id, r.id));
       return row;
     }),

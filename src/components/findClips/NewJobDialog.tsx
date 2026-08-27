@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Check, ChevronDown, FileUp, Film, Loader2, Search, Settings2, ShieldCheck, Sparkles } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { openProDialog } from "@/lib/license";
 import {
   highlightTunerModes,
   highlightTunerPreset,
@@ -10,6 +11,9 @@ import {
 } from "./highlightTunerForm";
 
 const draftKey = "clipsift.findClips.newProjectDraft.v2";
+
+/** Mirrors the server-side cap in server/clip/engine.ts. */
+const FREE_MAX_HEIGHT = 720;
 
 export type SavedProjectDraft = {
   player?: string;
@@ -44,6 +48,8 @@ const inputClass = "w-full rounded-xl border border-zinc-700/80 bg-[#111215] px-
 
 export function NewFindClipsJobForm({ onCreated, initialDraft }: { onCreated: (projectId: number) => void; initialDraft?: SavedProjectDraft }) {
   const saved = useMemo(() => ({ ...readProjectDraft(), ...initialDraft }), [initialDraft]);
+  const licenseStatus = trpc.license.status.useQuery();
+  const isPro = licenseStatus.data?.tier === "pro";
   const [player, setPlayer] = useState(saved.player ?? "");
   const [team, setTeam] = useState(saved.team ?? "");
   const [season, setSeason] = useState(saved.season ?? new Date().getFullYear());
@@ -234,7 +240,16 @@ export function NewFindClipsJobForm({ onCreated, initialDraft }: { onCreated: (p
             <div><h2 className="text-base font-semibold text-white">Clip standards</h2><p className="mt-1 text-xs leading-relaxed text-zinc-500">These safeguards apply to every clip produced by this job.</p></div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="text-xs font-medium text-zinc-400">Preferred quality<select className={`${inputClass} mt-1.5`} value={preferredHeight} onChange={(event) => setPreferredHeight(Math.max(Number(event.target.value), minimumHeight))}><option value={1080}>1080p</option><option value={1440}>1440p</option><option value={2160}>2160p / 4K</option><option value={720}>720p</option></select></label>
+            <label className="text-xs font-medium text-zinc-400">Preferred quality<select className={`${inputClass} mt-1.5`} value={preferredHeight} onChange={(event) => {
+              const next = Number(event.target.value);
+              // Free installs render at 720p. Say so instead of accepting the
+              // choice and quietly downgrading the finished clip.
+              if (!isPro && next > FREE_MAX_HEIGHT) {
+                openProDialog("Rendering above 720p");
+                return;
+              }
+              setPreferredHeight(Math.max(next, minimumHeight));
+            }}><option value={1080}>1080p{isPro ? "" : " (Pro)"}</option><option value={1440}>1440p{isPro ? "" : " (Pro)"}</option><option value={2160}>2160p / 4K{isPro ? "" : " (Pro)"}</option><option value={720}>720p</option></select></label>
             <label className="text-xs font-medium text-zinc-400">Minimum quality<select className={`${inputClass} mt-1.5`} value={minimumHeight} onChange={(event) => { const next = Number(event.target.value); setMinimumHeight(next); setPreferredHeight((current) => Math.max(current, next)); }}><option value={720}>720p minimum</option><option value={1080}>1080p minimum</option></select></label>
             <label className="text-xs font-medium text-zinc-400">Context before<div className="relative mt-1.5"><input className={`${inputClass} pr-12`} type="number" min={0} max={60} value={preRollSec} onChange={(event) => setPreRollSec(Number(event.target.value))} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-600">sec</span></div></label>
             <label className="text-xs font-medium text-zinc-400">Context after<div className="relative mt-1.5"><input className={`${inputClass} pr-12`} type="number" min={0} max={90} value={postRollSec} onChange={(event) => setPostRollSec(Number(event.target.value))} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-600">sec</span></div></label>

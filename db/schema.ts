@@ -1,61 +1,57 @@
+import { sql } from "drizzle-orm";
 import {
-  mysqlTable,
-  mysqlEnum,
-  varchar,
+  sqliteTable,
   text,
-  timestamp,
-  bigint,
-  int,
-  double,
-  boolean,
+  integer,
+  real,
   index,
   uniqueIndex,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/sqlite-core";
 
-export const projects = mysqlTable("projects", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const projects = sqliteTable("projects", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
-export const videos = mysqlTable("videos", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  videoId: varchar("video_id", { length: 32 }).notNull().unique(),
+export const videos = sqliteTable("videos", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  videoId: text("video_id").notNull().unique(),
   url: text("url").notNull(),
-  title: varchar("title", { length: 512 }),
-  channel: varchar("channel", { length: 255 }),
+  title: text("title"),
+  channel: text("channel"),
   thumbnail: text("thumbnail"),
-  durationSec: int("duration_sec"),
-  transcriptLang: varchar("transcript_lang", { length: 32 }),
-  transcriptKind: mysqlEnum("transcript_kind", [
+  durationSec: integer("duration_sec"),
+  transcriptLang: text("transcript_lang"),
+  transcriptKind: text("transcript_kind", { enum: [
     "manual",
     "auto",
     "local-whisper",
     "imported",
     "none",
-  ])
+  ] })
     .notNull()
     .default("none"),
-  status: mysqlEnum("status", ["ok", "no_transcript", "error"])
+  status: text("status", { enum: ["ok", "no_transcript", "error"] })
     .notNull()
     .default("ok"),
   errorMessage: text("error_message"),
-  favorite: boolean("favorite").notNull().default(false),
-  archived: boolean("archived").notNull().default(false),
-  projectId: bigint("project_id", { mode: "number", unsigned: true }),
-  lastPosition: double("last_position").notNull().default(0),
-  lastOpenedAt: timestamp("last_opened_at").notNull().defaultNow(),
-  retrievedAt: timestamp("retrieved_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  favorite: integer("favorite", { mode: "boolean" }).notNull().default(false),
+  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
+  projectId: integer("project_id", { mode: "number" }),
+  lastPosition: real("last_position").notNull().default(0),
+  lastOpenedAt: integer("last_opened_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  retrievedAt: integer("retrieved_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
-export const transcriptSegments = mysqlTable("transcript_segments", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }).notNull(),
-  idx: int("idx").notNull(),
+export const transcriptSegments = sqliteTable("transcript_segments", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  videoFk: integer("video_fk", { mode: "number" }).notNull(),
+  idx: integer("idx").notNull(),
   text: text("text").notNull(),
-  start: double("start").notNull(),
-  end: double("end").notNull(),
+  start: real("start").notNull(),
+  end: real("end").notNull(),
 });
 
 /**
@@ -63,29 +59,29 @@ export const transcriptSegments = mysqlTable("transcript_segments", {
  * retains user workspace state without mutating source captions, while edits
  * preserve an immutable original transcript alongside the display text.
  */
-export const transcriptStudioSessions = mysqlTable("transcript_studio_sessions", {
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }).primaryKey(),
-  searchQuery: varchar("search_query", { length: 512 }).notNull().default(""),
-  inPoint: double("in_point"),
-  outPoint: double("out_point"),
+export const transcriptStudioSessions = sqliteTable("transcript_studio_sessions", {
+  videoFk: integer("video_fk", { mode: "number" }).primaryKey(),
+  searchQuery: text("search_query").notNull().default(""),
+  inPoint: real("in_point"),
+  outPoint: real("out_point"),
   clipQueue: text("clip_queue"), // JSON: locally staged clips and linked render jobs
-  sourceHeight: int("source_height"),
-  sourceDurationSec: double("source_duration_sec"),
-  transcriptCacheKey: varchar("transcript_cache_key", { length: 200 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  sourceHeight: integer("source_height"),
+  sourceDurationSec: real("source_duration_sec"),
+  transcriptCacheKey: text("transcript_cache_key"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
 });
 
-export const transcriptStudioSegmentEdits = mysqlTable(
+export const transcriptStudioSegmentEdits = sqliteTable(
   "transcript_studio_segment_edits",
   {
-    id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-    videoFk: bigint("video_fk", { mode: "number", unsigned: true }).notNull(),
-    segmentIdx: int("segment_idx").notNull(),
+    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    videoFk: integer("video_fk", { mode: "number" }).notNull(),
+    segmentIdx: integer("segment_idx").notNull(),
     originalText: text("original_text").notNull(),
     displayText: text("display_text").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
   },
   (table) => [uniqueIndex("transcript_studio_segment_edits_video_segment_uq").on(table.videoFk, table.segmentIdx)],
 );
@@ -95,25 +91,25 @@ export const transcriptStudioSegmentEdits = mysqlTable(
  * do not use clip_jobs, moments, candidates, script beats, or Find Clips rows;
  * this keeps a quick manual edit from changing automated pipeline state.
  */
-export const transcriptStudioExports = mysqlTable(
+export const transcriptStudioExports = sqliteTable(
   "transcript_studio_exports",
   {
-    id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-    videoFk: bigint("video_fk", { mode: "number", unsigned: true }).notNull(),
-    mode: mysqlEnum("mode", ["separate", "joined"]).notNull().default("separate"),
-    title: varchar("title", { length: 512 }).notNull(),
+    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    videoFk: integer("video_fk", { mode: "number" }).notNull(),
+    mode: text("mode", { enum: ["separate", "joined"] }).notNull().default("separate"),
+    title: text("title").notNull(),
     items: text("items").notNull(), // ordered JSON: [{draftId,label,inPoint,outPoint}]
     outputDir: text("output_dir").notNull(), // canonical absolute Windows directory
-    status: mysqlEnum("status", ["queued", "preparing", "rendering", "joining", "ready", "failed", "cancelled"])
+    status: text("status", { enum: ["queued", "preparing", "rendering", "joining", "ready", "failed", "cancelled"] })
       .notNull()
       .default("queued"),
-    progress: double("progress").notNull().default(0),
-    stage: varchar("stage", { length: 255 }).notNull().default("Queued"),
+    progress: real("progress").notNull().default(0),
+    stage: text("stage").notNull().default("Queued"),
     outputPaths: text("output_paths"), // ordered JSON array for separate exports
     outputPath: text("output_path"), // joined output, or the sole separate output
     error: text("error"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
   },
   (table) => [index("transcript_studio_exports_video_status_idx").on(table.videoFk, table.status)],
 );
@@ -124,28 +120,28 @@ export const transcriptStudioExports = mysqlTable(
  * these rows only snapshot the original lineage and point at a separately
  * rendered Studio export.
  */
-export const clipPackageEditVersions = mysqlTable(
+export const clipPackageEditVersions = sqliteTable(
   "clip_package_edit_versions",
   {
-    id: varchar("id", { length: 36 }).primaryKey(),
-    projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-    candidateFk: bigint("candidate_fk", { mode: "number", unsigned: true }).notNull(),
-    sourceVideoFk: bigint("source_video_fk", { mode: "number", unsigned: true }).notNull(),
-    sourceClipJobFk: bigint("source_clip_job_fk", { mode: "number", unsigned: true }).notNull(),
-    studioExportFk: bigint("studio_export_fk", { mode: "number", unsigned: true }),
-    studioDraftId: varchar("studio_draft_id", { length: 120 }),
-    intent: mysqlEnum("intent", ["new_version", "replacement"]).notNull().default("new_version"),
-    status: mysqlEnum("status", ["draft", "exporting", "ready", "failed", "retired"])
+    id: text("id").primaryKey(),
+    projectFk: integer("project_fk", { mode: "number" }).notNull(),
+    candidateFk: integer("candidate_fk", { mode: "number" }).notNull(),
+    sourceVideoFk: integer("source_video_fk", { mode: "number" }).notNull(),
+    sourceClipJobFk: integer("source_clip_job_fk", { mode: "number" }).notNull(),
+    studioExportFk: integer("studio_export_fk", { mode: "number" }),
+    studioDraftId: text("studio_draft_id"),
+    intent: text("intent", { enum: ["new_version", "replacement"] }).notNull().default("new_version"),
+    status: text("status", { enum: ["draft", "exporting", "ready", "failed", "retired"] })
       .notNull()
       .default("draft"),
-    activeReplacement: boolean("active_replacement").notNull().default(false),
-    originalIn: double("original_in").notNull(),
-    originalOut: double("original_out").notNull(),
-    editIn: double("edit_in").notNull(),
-    editOut: double("edit_out").notNull(),
+    activeReplacement: integer("active_replacement", { mode: "boolean" }).notNull().default(false),
+    originalIn: real("original_in").notNull(),
+    originalOut: real("original_out").notNull(),
+    editIn: real("edit_in").notNull(),
+    editOut: real("edit_out").notNull(),
     drivePath: text("drive_path"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
   },
   (table) => [
     index("clip_package_edit_versions_project_candidate_idx").on(table.projectFk, table.candidateFk),
@@ -154,26 +150,26 @@ export const clipPackageEditVersions = mysqlTable(
   ],
 );
 
-export const moments = mysqlTable("moments", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }).notNull(),
-  title: varchar("title", { length: 512 }).notNull(),
+export const moments = sqliteTable("moments", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  videoFk: integer("video_fk", { mode: "number" }).notNull(),
+  title: text("title").notNull(),
   note: text("note"),
-  start: double("start").notNull(),
-  end: double("end"),
+  start: real("start").notNull(),
+  end: real("end"),
   excerpt: text("excerpt"),
-  color: varchar("color", { length: 32 }).notNull().default("amber"),
-  status: mysqlEnum("status", ["candidate", "selected", "used"])
+  color: text("color").notNull().default("amber"),
+  status: text("status", { enum: ["candidate", "selected", "used"] })
     .notNull()
     .default("candidate"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
-export const searchHistory = mysqlTable("search_history", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }).notNull(),
-  query: varchar("query", { length: 512 }).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const searchHistory = sqliteTable("search_history", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  videoFk: integer("video_fk", { mode: "number" }).notNull(),
+  query: text("query").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -193,53 +189,53 @@ export const SCRIPT_PROJECT_STATUSES = [
   "failed",
 ] as const;
 
-export const scriptProjects = mysqlTable("script_projects", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  topic: varchar("topic", { length: 255 }),
+export const scriptProjects = sqliteTable("script_projects", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  topic: text("topic"),
   tags: text("tags"), // JSON array
-  sourceProvider: varchar("source_provider", { length: 40 }).notNull().default("manual"),
-  sourceDocId: varchar("source_doc_id", { length: 128 }), // stable identity (Google Doc ID)
-  sourceTitle: varchar("source_title", { length: 512 }),
+  sourceProvider: text("source_provider").notNull().default("manual"),
+  sourceDocId: text("source_doc_id"), // stable identity (Google Doc ID)
+  sourceTitle: text("source_title"),
   sourceUrl: text("source_url"),
-  sourceModifiedAt: varchar("source_modified_at", { length: 64 }),
-  status: mysqlEnum("status", SCRIPT_PROJECT_STATUSES).notNull().default("imported"),
-  currentRevision: int("current_revision").notNull().default(1),
-  prerollSec: double("preroll_sec").notNull().default(3),
-  postrollSec: double("postroll_sec").notNull().default(1.5),
-  defaultClipLenSec: double("default_clip_len_sec").notNull().default(8),
+  sourceModifiedAt: text("source_modified_at"),
+  status: text("status", { enum: SCRIPT_PROJECT_STATUSES }).notNull().default("imported"),
+  currentRevision: integer("current_revision").notNull().default(1),
+  prerollSec: real("preroll_sec").notNull().default(3),
+  postrollSec: real("postroll_sec").notNull().default(1.5),
+  defaultClipLenSec: real("default_clip_len_sec").notNull().default(8),
   pipelineLog: text("pipeline_log"), // JSON array of {at, stage, provider?, ok, message?}
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
 });
 
-export const scriptRevisions = mysqlTable("script_revisions", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-  revision: int("revision").notNull(),
+export const scriptRevisions = sqliteTable("script_revisions", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  projectFk: integer("project_fk", { mode: "number" }).notNull(),
+  revision: integer("revision").notNull(),
   scriptText: text("script_text").notNull(),
-  scriptHash: varchar("script_hash", { length: 64 }).notNull(),
-  extractedFromHeading: varchar("extracted_from_heading", { length: 200 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  scriptHash: text("script_hash").notNull(),
+  extractedFromHeading: text("extracted_from_heading"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
-export const scriptBeats = mysqlTable("script_beats", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-  revisionFk: bigint("revision_fk", { mode: "number", unsigned: true }).notNull(),
-  ord: int("ord").notNull(),
+export const scriptBeats = sqliteTable("script_beats", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  projectFk: integer("project_fk", { mode: "number" }).notNull(),
+  revisionFk: integer("revision_fk", { mode: "number" }).notNull(),
+  ord: integer("ord").notNull(),
   text: text("text").notNull(),
   entities: text("entities"), // JSON
   aliases: text("aliases"), // JSON
-  purpose: varchar("purpose", { length: 40 }),
+  purpose: text("purpose"),
   coverageTypes: text("coverage_types"), // JSON array
-  needsTranscriptSearch: boolean("needs_transcript_search").notNull().default(true),
-  visualOnly: boolean("visual_only").notNull().default(false),
-  desiredClipLenSec: double("desired_clip_len_sec"),
+  needsTranscriptSearch: integer("needs_transcript_search", { mode: "boolean" }).notNull().default(true),
+  visualOnly: integer("visual_only", { mode: "boolean" }).notNull().default(false),
+  desiredClipLenSec: real("desired_clip_len_sec"),
   queries: text("queries"), // JSON array (budgeted)
   uncertainty: text("uncertainty"),
-  status: mysqlEnum("status", ["pending", "covered", "needs_footage"]).notNull().default("pending"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status", { enum: ["pending", "covered", "needs_footage"] }).notNull().default("pending"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
 export const CANDIDATE_STATES = ["undecided", "approved", "rejected"] as const;
@@ -251,112 +247,112 @@ export const MATCH_KINDS = [
   "manual_review",
 ] as const;
 
-export const clipCandidates = mysqlTable("clip_candidates", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-  revisionFk: bigint("revision_fk", { mode: "number", unsigned: true }).notNull(),
-  beatFk: bigint("beat_fk", { mode: "number", unsigned: true }).notNull(),
-  provider: varchar("provider", { length: 40 }).notNull(),
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }), // set when backed by a library video
+export const clipCandidates = sqliteTable("clip_candidates", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  projectFk: integer("project_fk", { mode: "number" }).notNull(),
+  revisionFk: integer("revision_fk", { mode: "number" }).notNull(),
+  beatFk: integer("beat_fk", { mode: "number" }).notNull(),
+  provider: text("provider").notNull(),
+  videoFk: integer("video_fk", { mode: "number" }), // set when backed by a library video
   sourceUrl: text("source_url").notNull(),
-  sourceAccount: varchar("source_account", { length: 300 }),
-  title: varchar("title", { length: 512 }),
-  publishedAt: varchar("published_at", { length: 64 }),
-  durationSec: double("duration_sec"),
+  sourceAccount: text("source_account"),
+  title: text("title"),
+  publishedAt: text("published_at"),
+  durationSec: real("duration_sec"),
   thumbnailUrl: text("thumbnail_url"),
-  matchKind: mysqlEnum("match_kind", MATCH_KINDS).notNull().default("manual_review"),
+  matchKind: text("match_kind", { enum: MATCH_KINDS }).notNull().default("manual_review"),
   transcriptExcerpt: text("transcript_excerpt"),
-  segStart: double("seg_start"), // source timestamp (seconds)
-  segEnd: double("seg_end"),
-  editIn: double("edit_in"), // suggested edit range (seconds)
-  editOut: double("edit_out"),
-  relevanceScore: double("relevance_score").notNull().default(0),
-  qualityScore: double("quality_score").notNull().default(0),
-  cleanSourceScore: double("clean_source_score").notNull().default(0),
-  visualConfidence: double("visual_confidence").notNull().default(0),
+  segStart: real("seg_start"), // source timestamp (seconds)
+  segEnd: real("seg_end"),
+  editIn: real("edit_in"), // suggested edit range (seconds)
+  editOut: real("edit_out"),
+  relevanceScore: real("relevance_score").notNull().default(0),
+  qualityScore: real("quality_score").notNull().default(0),
+  cleanSourceScore: real("clean_source_score").notNull().default(0),
+  visualConfidence: real("visual_confidence").notNull().default(0),
   reason: text("reason"),
-  acquisitionStatus: varchar("acquisition_status", { length: 60 }).notNull().default("metadata_only"),
-  dupGroupKey: varchar("dup_group_key", { length: 80 }),
-  state: mysqlEnum("state", CANDIDATE_STATES).notNull().default("undecided"),
+  acquisitionStatus: text("acquisition_status").notNull().default("metadata_only"),
+  dupGroupKey: text("dup_group_key"),
+  state: text("state", { enum: CANDIDATE_STATES }).notNull().default("undecided"),
   userNotes: text("user_notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
 });
 
-export const scriptSearchCache = mysqlTable("script_search_cache", {
-  cacheKey: varchar("cache_key", { length: 200 }).primaryKey(),
+export const scriptSearchCache = sqliteTable("script_search_cache", {
+  cacheKey: text("cache_key").primaryKey(),
   payload: text("payload").notNull(), // JSON
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  expiresAt: bigint("expires_at", { mode: "number" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  expiresAt: integer("expires_at", { mode: "number" }).notNull(),
 });
 
 // Durable Find Clips orchestration. The established script project, beat,
 // candidate, video, transcript and clip-job tables remain the canonical media
 // model; these rows only own queue/recovery state and source provenance.
-export const findJobs = mysqlTable(
+export const findJobs = sqliteTable(
   "find_jobs",
   {
-    id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-    projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-    player: varchar("player", { length: 255 }).notNull(),
-    team: varchar("team", { length: 255 }).notNull(),
-    season: int("season").notNull(),
-    opponent: varchar("opponent", { length: 255 }),
-    sourceLimit: int("source_limit").notNull().default(20),
-    clipLimit: int("clip_limit").notNull().default(30),
-    preferredHeight: int("preferred_height").notNull().default(1080),
-    minimumHeight: int("minimum_height").notNull().default(720),
-    preRollSec: double("pre_roll_sec").notNull().default(10),
-    postRollSec: double("post_roll_sec").notNull().default(15),
-    localAsrFallback: boolean("local_asr_fallback").notNull().default(true),
+    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    projectFk: integer("project_fk", { mode: "number" }).notNull(),
+    player: text("player").notNull(),
+    team: text("team").notNull(),
+    season: integer("season").notNull(),
+    opponent: text("opponent"),
+    sourceLimit: integer("source_limit").notNull().default(20),
+    clipLimit: integer("clip_limit").notNull().default(30),
+    preferredHeight: integer("preferred_height").notNull().default(1080),
+    minimumHeight: integer("minimum_height").notNull().default(720),
+    preRollSec: real("pre_roll_sec").notNull().default(10),
+    postRollSec: real("post_roll_sec").notNull().default(15),
+    localAsrFallback: integer("local_asr_fallback", { mode: "boolean" }).notNull().default(true),
     highlightTunerSettings: text("highlight_tuner_settings"), // nullable JSON; null preserves legacy Everything behavior
-    status: varchar("status", { length: 48 }).notNull().default("queued"),
-    stage: varchar("stage", { length: 80 }).notNull().default("queued"),
-    progressPercent: double("progress_percent").notNull().default(0),
+    status: text("status").notNull().default("queued"),
+    stage: text("stage").notNull().default("queued"),
+    progressPercent: real("progress_percent").notNull().default(0),
     currentOperation: text("current_operation"),
-    pauseRequested: boolean("pause_requested").notNull().default(false),
-    cancelRequested: boolean("cancel_requested").notNull().default(false),
-    retryCount: int("retry_count").notNull().default(0),
-    maxRetries: int("max_retries").notNull().default(3),
-    sourcesFound: int("sources_found").notNull().default(0),
-    transcriptsFound: int("transcripts_found").notNull().default(0),
-    candidatesFound: int("candidates_found").notNull().default(0),
-    clipsQueued: int("clips_queued").notNull().default(0),
-    clipsVerified: int("clips_verified").notNull().default(0),
+    pauseRequested: integer("pause_requested", { mode: "boolean" }).notNull().default(false),
+    cancelRequested: integer("cancel_requested", { mode: "boolean" }).notNull().default(false),
+    retryCount: integer("retry_count").notNull().default(0),
+    maxRetries: integer("max_retries").notNull().default(3),
+    sourcesFound: integer("sources_found").notNull().default(0),
+    transcriptsFound: integer("transcripts_found").notNull().default(0),
+    candidatesFound: integer("candidates_found").notNull().default(0),
+    clipsQueued: integer("clips_queued").notNull().default(0),
+    clipsVerified: integer("clips_verified").notNull().default(0),
     warnings: text("warnings"), // JSON string[]
     lastError: text("last_error"),
-    lastProgressAt: timestamp("last_progress_at").notNull().defaultNow(),
-    workerHeartbeatAt: timestamp("worker_heartbeat_at"),
-    startedAt: timestamp("started_at"),
-    completedAt: timestamp("completed_at"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    lastProgressAt: integer("last_progress_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    workerHeartbeatAt: integer("worker_heartbeat_at", { mode: "timestamp" }),
+    startedAt: integer("started_at", { mode: "timestamp" }),
+    completedAt: integer("completed_at", { mode: "timestamp" }),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
   },
   (table) => [uniqueIndex("find_jobs_project_uq").on(table.projectFk)],
 );
 
-export const findSources = mysqlTable(
+export const findSources = sqliteTable(
   "find_sources",
   {
-    id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-    jobFk: bigint("job_fk", { mode: "number", unsigned: true }).notNull(),
-    projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
-    videoId: varchar("video_id", { length: 32 }).notNull(),
-    videoFk: bigint("video_fk", { mode: "number", unsigned: true }),
+    id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    jobFk: integer("job_fk", { mode: "number" }).notNull(),
+    projectFk: integer("project_fk", { mode: "number" }).notNull(),
+    videoId: text("video_id").notNull(),
+    videoFk: integer("video_fk", { mode: "number" }),
     url: text("url").notNull(),
-    title: varchar("title", { length: 512 }),
-    channel: varchar("channel", { length: 255 }),
-    durationSec: int("duration_sec"),
-    publishedAt: varchar("published_at", { length: 64 }),
-    searchQuery: varchar("search_query", { length: 512 }),
-    sourceType: varchar("source_type", { length: 64 }).notNull().default("youtube"),
-    rankScore: double("rank_score").notNull().default(0),
-    captionKind: varchar("caption_kind", { length: 32 }),
-    status: varchar("status", { length: 48 }).notNull().default("metadata"),
-    attemptCount: int("attempt_count").notNull().default(0),
+    title: text("title"),
+    channel: text("channel"),
+    durationSec: integer("duration_sec"),
+    publishedAt: text("published_at"),
+    searchQuery: text("search_query"),
+    sourceType: text("source_type").notNull().default("youtube"),
+    rankScore: real("rank_score").notNull().default(0),
+    captionKind: text("caption_kind"),
+    status: text("status").notNull().default("metadata"),
+    attemptCount: integer("attempt_count").notNull().default(0),
     lastError: text("last_error"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
   },
   (table) => [uniqueIndex("find_sources_job_video_uq").on(table.jobFk, table.videoId)],
 );
@@ -380,54 +376,54 @@ export const CLIP_JOB_STATUSES = [
 // hold recoverable history snapshots.
 // ══════════════════════════════════════════════════════════════════
 
-export const assembleProjects = mysqlTable("assemble_projects", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  sourceProjectFk: bigint("source_project_fk", { mode: "number", unsigned: true }), // optional link to script_projects
-  sourceJobSlug: varchar("source_job_slug", { length: 255 }), // optional link to a pipeline job folder under the clips directory
+export const assembleProjects = sqliteTable("assemble_projects", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  sourceProjectFk: integer("source_project_fk", { mode: "number" }), // optional link to script_projects
+  sourceJobSlug: text("source_job_slug"), // optional link to a pipeline job folder under the clips directory
   doc: text("doc").notNull(), // JSON: AssembleDoc (schemaVersion, beats, items, settings, narration)
-  preset: varchar("preset", { length: 32 }).notNull().default("vertical-9x16"),
-  status: varchar("status", { length: 40 }).notNull().default("draft"), // draft | assembled | rendering | rendered | failed
+  preset: text("preset").notNull().default("vertical-9x16"),
+  status: text("status").notNull().default("draft"), // draft | assembled | rendering | rendered | failed
   renderLog: text("render_log"), // JSON array of {at, ok, message}
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
 });
 
-export const assembleAutosaves = mysqlTable("assemble_autosaves", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  projectFk: bigint("project_fk", { mode: "number", unsigned: true }).notNull(),
+export const assembleAutosaves = sqliteTable("assemble_autosaves", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  projectFk: integer("project_fk", { mode: "number" }).notNull(),
   doc: text("doc").notNull(), // JSON snapshot of AssembleDoc at save time
-  reason: varchar("reason", { length: 60 }).notNull().default("autosave"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  reason: text("reason").notNull().default("autosave"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
-export const clipJobs = mysqlTable("clip_jobs", {
-  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
-  kind: mysqlEnum("kind", ["candidate", "moment"]).notNull(),
-  projectFk: bigint("project_fk", { mode: "number", unsigned: true }), // script project (candidate jobs)
-  candidateFk: bigint("candidate_fk", { mode: "number", unsigned: true }), // script candidate
-  momentFk: bigint("moment_fk", { mode: "number", unsigned: true }), // single-video moment
-  videoFk: bigint("video_fk", { mode: "number", unsigned: true }), // library video row
+export const clipJobs = sqliteTable("clip_jobs", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  kind: text("kind", { enum: ["candidate", "moment"] }).notNull(),
+  projectFk: integer("project_fk", { mode: "number" }), // script project (candidate jobs)
+  candidateFk: integer("candidate_fk", { mode: "number" }), // script candidate
+  momentFk: integer("moment_fk", { mode: "number" }), // single-video moment
+  videoFk: integer("video_fk", { mode: "number" }), // library video row
   sourceUrl: text("source_url").notNull(), // YouTube watch URL
-  title: varchar("title", { length: 512 }).notNull(), // clip display name
-  fileName: varchar("file_name", { length: 512 }), // output filename when ready
-  editIn: double("edit_in").notNull(),
-  editOut: double("edit_out").notNull(),
-  height: int("height").notNull().default(720), // requested output height (0 = best)
-  minimumHeight: int("minimum_height").notNull().default(720), // verification floor
-  uploadToDrive: boolean("upload_to_drive").notNull().default(false),
-  status: mysqlEnum("status", CLIP_JOB_STATUSES).notNull().default("queued"),
-  progress: double("progress").notNull().default(0), // 0..100
-  stage: varchar("stage", { length: 200 }).notNull().default("queued"),
+  title: text("title").notNull(), // clip display name
+  fileName: text("file_name"), // output filename when ready
+  editIn: real("edit_in").notNull(),
+  editOut: real("edit_out").notNull(),
+  height: integer("height").notNull().default(720), // requested output height (0 = best)
+  minimumHeight: integer("minimum_height").notNull().default(720), // verification floor
+  uploadToDrive: integer("upload_to_drive", { mode: "boolean" }).notNull().default(false),
+  status: text("status", { enum: CLIP_JOB_STATUSES }).notNull().default("queued"),
+  progress: real("progress").notNull().default(0), // 0..100
+  stage: text("stage").notNull().default("queued"),
   outputPath: text("output_path"), // absolute path to finished mp4
-  fileSizeBytes: bigint("file_size_bytes", { mode: "number" }),
-  outputWidth: int("output_width"),
-  outputHeight: int("output_height"),
-  outputDurationSec: double("output_duration_sec"),
-  outputHasAudio: boolean("output_has_audio"),
+  fileSizeBytes: integer("file_size_bytes", { mode: "number" }),
+  outputWidth: integer("output_width"),
+  outputHeight: integer("output_height"),
+  outputDurationSec: real("output_duration_sec"),
+  outputHasAudio: integer("output_has_audio", { mode: "boolean" }),
   drivePath: text("drive_path"), // gdrive:ClipSift/<project>/<file> when uploaded
   error: text("error"),
   diagnosticError: text("diagnostic_error"), // sanitized tool/client failure detail for Diagnostics
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`).$onUpdate(() => new Date()),
 });

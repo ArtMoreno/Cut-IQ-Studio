@@ -2,7 +2,7 @@ import { z } from "zod";
 import { execFile } from "node:child_process";
 import { existsSync, statfsSync } from "node:fs";
 import { promisify } from "node:util";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createRouter, publicQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import { findJobs } from "@db/schema";
@@ -78,8 +78,8 @@ type Diagnostic = { id: string; label: string; status: "pass" | "warning" | "fai
 export async function runDiagnostics(includeNetwork: boolean): Promise<Diagnostic[]> {
   const out: Diagnostic[] = [];
   try {
-    await getDb().execute(sql`select 1`);
-    out.push({ id: "database", label: "App database", status: "pass", detail: "MariaDB responded." });
+    getDb().$client.prepare("select 1").get();
+    out.push({ id: "database", label: "App database", status: "pass", detail: "SQLite responded." });
   } catch (error) {
     out.push({ id: "database", label: "App database", status: "fail", detail: error instanceof Error ? error.message : String(error) });
   }

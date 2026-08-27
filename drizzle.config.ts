@@ -1,16 +1,19 @@
 import "dotenv/config";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import { defineConfig } from "drizzle-kit";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is required to run drizzle commands");
-}
+// Mirrors server/runtimePaths.ts. Kept literal here because drizzle-kit loads
+// this file outside the server's module graph.
+const databaseFile = resolve(
+  process.env.CUTIQ_DATABASE_FILE || join(homedir(), ".cut-iq-studio", "cut-iq-studio.db"),
+);
 
 export default defineConfig({
   schema: "./db/schema.ts",
   out: "./db/migrations",
-  dialect: "mysql",
+  dialect: "sqlite",
   dbCredentials: {
-    url: connectionString,
+    url: databaseFile,
   },
 });

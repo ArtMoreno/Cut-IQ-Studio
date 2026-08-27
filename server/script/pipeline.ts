@@ -145,7 +145,7 @@ export async function upsertScriptProject(input: {
         status: "imported",
         currentRevision: 1,
       })
-      .$returningId();
+      .returning({ id: scriptProjects.id });
     [project] = await db.select().from(scriptProjects).where(eq(scriptProjects.id, ins.id));
     revisionNo = 1;
     await db.insert(scriptRevisions).values({
@@ -296,7 +296,9 @@ async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
   await db
     .insert(scriptSearchCache)
     .values({ cacheKey: key, payload: JSON.stringify(value), expiresAt: Date.now() + CACHE_TTL_MS })
-    .onDuplicateKeyUpdate({ set: { payload: JSON.stringify(value), expiresAt: Date.now() + CACHE_TTL_MS } });
+    .onConflictDoUpdate({
+      target: scriptSearchCache.cacheKey,
+      set: { payload: JSON.stringify(value), expiresAt: Date.now() + CACHE_TTL_MS } });
   return value;
 }
 

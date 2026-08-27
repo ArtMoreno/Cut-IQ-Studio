@@ -144,7 +144,7 @@ async function discoverBroadcastSoundbites(projectId: number): Promise<Candidate
           dupGroupKey: `sound:${source.videoId}:${Math.round(window.center / 15)}`.slice(0, 80),
           state: "approved",
         })
-        .$returningId();
+        .returning({ id: clipCandidates.id });
       if (inserted?.id != null) {
         const [candidate] = await db.select().from(clipCandidates).where(eq(clipCandidates.id, Number(inserted.id)));
         if (candidate) existing.push(candidate);
