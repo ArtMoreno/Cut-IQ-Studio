@@ -43,8 +43,6 @@ Source: "..\dist\*"; DestDir: "{app}\app\dist"; Flags: ignoreversion recursesubd
 ; better-sqlite3 is a native module, so it stays out of the esbuild bundle and
 ; ships as real files the app resolves at runtime.
 Source: "..\node_modules\better-sqlite3\*"; DestDir: "{app}\app\node_modules\better-sqlite3"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\node_modules\bindings\*"; DestDir: "{app}\app\node_modules\bindings"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\node_modules\file-uri-to-path\*"; DestDir: "{app}\app\node_modules\file-uri-to-path"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "runtime\*"; DestDir: "{app}\runtime"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\db\migrations\*"; DestDir: "{app}\resources\migrations"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Start-CutIQStudio.ps1"; DestDir: "{app}"; Flags: ignoreversion
