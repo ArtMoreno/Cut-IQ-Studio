@@ -84,7 +84,9 @@ try {
     $env:CLIPSIFT_LOCAL_GOOGLE_DRIVE_ROOT = ""
     $appOut = Join-Path $logRoot "app.log"
     $appErr = Join-Path $logRoot "app-error.log"
-    $appProcess = Start-Process -FilePath $nodePath -WorkingDirectory (Join-Path $installRoot "app") -ArgumentList $bootPath -WindowStyle Hidden -RedirectStandardOutput $appOut -RedirectStandardError $appErr -PassThru
+    # Quoted: the default install path contains spaces, and Start-Process would
+    # otherwise hand node a path truncated at the first one.
+    $appProcess = Start-Process -FilePath $nodePath -WorkingDirectory (Join-Path $installRoot "app") -ArgumentList "`"$bootPath`"" -WindowStyle Hidden -RedirectStandardOutput $appOut -RedirectStandardError $appErr -PassThru
     Set-Content -LiteralPath $appPidPath -Value $appProcess.Id -Encoding ASCII
     Wait-Until -Seconds 60 -Failure "Cut IQ Studio did not become ready. See $appErr" -Condition { Test-HttpReady $url }
   }
