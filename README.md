@@ -17,7 +17,7 @@
 - **Manual Clip Studio** loads a YouTube URL or local video, follows the timed transcript, marks precise IN/OUT ranges, and exports separate or joined MP4s.
 - **Clip Packages** review, refine, replace, download, and organize completed project assets without rewriting the source.
 
-Cut IQ keeps project metadata in a local MariaDB instance and finished media in your Videos folder. The server binds to `127.0.0.1`; it is not exposed to your LAN or the public internet. Google Drive support is optional and off by default.
+Cut IQ keeps project metadata in a local SQLite file and finished media in your Videos folder. The server binds to `127.0.0.1`; it is not exposed to your LAN or the public internet. Google Drive support is optional and off by default.
 
 ## Free and Pro
 
@@ -47,7 +47,7 @@ anywhere. Keys are issued by hand today, so allow a few hours after buying.
 2. Run the installer.
 3. Open **Cut IQ Studio** from the desktop or Start menu.
 
-The x64 installer includes the app, Node.js, MariaDB, FFmpeg/ffprobe, and yt-dlp. No separate database or media-tool setup is required. The first launch initializes a private loopback-only database and creates:
+The x64 installer includes the app, Node.js, FFmpeg/ffprobe, and yt-dlp. No separate database or media-tool setup is required. The first launch creates a local database file and:
 
 ```text
 %USERPROFILE%\Videos\Cut IQ Studio\Clips
@@ -60,7 +60,7 @@ Local transcription is optional and is not bundled because speech models add sev
 
 ## Privacy and safety
 
-- Localhost-only HTTP and database listeners.
+- Localhost-only HTTP listener; the database is a local file with no listener at all.
 - No analytics, telemetry, advertising, or account requirement.
 - No credentials or personal project data in this repository.
 - Google Drive and rclone are opt-in environment integrations.
@@ -69,7 +69,7 @@ Local transcription is optional and is not bundled because speech models add sev
 
 ## Development
 
-Requirements: Node.js 22+ and MySQL 8 or MariaDB 10.6+.
+Requirements: Node.js 22+. The database is a local SQLite file created on first run.
 
 ```powershell
 git clone https://github.com/ArtMoreno/Cut-IQ-Studio.git
@@ -80,7 +80,7 @@ npm run db:push
 npm run dev
 ```
 
-Set `DATABASE_URL` in `.env` before running the schema command. The development server opens at `http://127.0.0.1:3000`.
+The development server opens at `http://127.0.0.1:3000`. The database file is created automatically; override its location with `CUTIQ_DATABASE_FILE`.
 
 ### Quality gates
 
@@ -107,7 +107,7 @@ The build downloads pinned upstream runtimes, verifies their SHA-256 hashes, com
 |---|---|
 | Desktop UI | React 19, TypeScript, Vite, Tailwind CSS |
 | Local API | Hono, tRPC, TanStack Query, zod |
-| Project data | Drizzle ORM, MariaDB |
+| Project data | Drizzle ORM, SQLite |
 | Media pipeline | yt-dlp, FFmpeg, ffprobe |
 | Packaging | Inno Setup, GitHub Actions |
 

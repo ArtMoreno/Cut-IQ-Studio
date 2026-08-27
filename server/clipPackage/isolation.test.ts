@@ -8,7 +8,7 @@
  *
  * `openClipPackage` is tested through its real composition (manifest build →
  * unique-clip collapse → canonical play filtering) with the database mocked at
- * the `getDb()` boundary so no MariaDB instance is required.
+ * the `getDb()` boundary so no database server is required.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 

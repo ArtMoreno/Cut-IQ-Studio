@@ -1,7 +1,7 @@
 /**
  * Assemble project model — a versioned, nondestructive edit-decision model.
  *
- * The canonical edit is a JSON document (stored in MariaDB, exportable to disk),
+ * The canonical edit is a JSON document (stored in SQLite, exportable to disk),
  * NOT a CMX3600/EDL and NOT a concat-demuxer recipe. FFmpeg is the render
  * backend; this document is the project. (Master prompt §69/§75.)
  *

@@ -2,9 +2,9 @@ $ErrorActionPreference = "SilentlyContinue"
 $installRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path
 $localRoot = if ($env:CUTIQ_LOCAL_ROOT) { [IO.Path]::GetFullPath($env:CUTIQ_LOCAL_ROOT) } else { Join-Path $env:LOCALAPPDATA "Cut IQ Studio" }
 $dataRoot = Join-Path $localRoot "Data"
+# SQLite is a file, not a process, so the app server is the only thing to stop.
 $targets = @(
-  @{ PidFile = Join-Path $dataRoot "cut-iq.pid"; Executable = Join-Path $installRoot "runtime\node\node.exe" },
-  @{ PidFile = Join-Path $dataRoot "mariadb.pid"; Executable = Join-Path $installRoot "runtime\mariadb\bin\mariadbd.exe" }
+  @{ PidFile = Join-Path $dataRoot "cut-iq.pid"; Executable = Join-Path $installRoot "runtime\node\node.exe" }
 )
 foreach ($target in $targets) {
   if (-not (Test-Path -LiteralPath $target.PidFile)) { continue }

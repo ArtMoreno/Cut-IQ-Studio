@@ -27,23 +27,12 @@ jobs:
   database-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    services:
-      mariadb:
-        image: mariadb:11.4
-        env:
-          MARIADB_ROOT_PASSWORD: cut-iq-ci
-          MARIADB_DATABASE: cutiq
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+    # No database service: the app uses a local SQLite file created by its own
+    # migrations, so this job needs nothing but a temp directory.
     env:
-      DATABASE_URL: mysql://root:cut-iq-ci@127.0.0.1:3306/cutiq
       APP_ID: cut-iq-studio-ci
       APP_SECRET: cut-iq-studio-ci-only
+      CUTIQ_DATABASE_FILE: ${{ runner.temp }}/cut-iq-ci.db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,5 +41,5 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Initialize test schema
-        run: mysql --host=127.0.0.1 --port=3306 --user=root --password=cut-iq-ci cutiq < installer/schema.sql
+        run: npx drizzle-kit migrate
       - run: npx vitest run server/script/pipeline.test.ts

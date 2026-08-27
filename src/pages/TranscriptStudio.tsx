@@ -441,7 +441,7 @@ export default function TranscriptStudio() {
   }, [sessionQuery.data?.session, sessionQuery.isFetched, video]);
 
   // The most recently used Studio session is restored after an app restart.
-  // Cached captions, edits, marks and queued jobs remain in MariaDB; this is
+  // Cached captions, edits, marks and queued jobs remain in the database; this is
   // only a small local pointer to the last library video.
   useEffect(() => {
     if (restoreAttemptedRef.current) return;

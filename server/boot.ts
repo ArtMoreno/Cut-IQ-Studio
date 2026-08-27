@@ -3,10 +3,14 @@ import { env } from "./lib/env";
 import { recoverStaleJobs } from "./clip/engine";
 import { startFindClipsWorker } from "./findClips/engine";
 import { recoverStudioExports } from "./transcriptStudio/exportEngine";
+import { migrateDatabase } from "./queries/migrate";
 
 // Standalone entry (npm run start / npm run dev via @hono/vite-dev-server).
 // Static files + HTTP listener only when running outside Vercel.
 if (env.isProduction) {
+  // Create or update the local SQLite file before anything reads from it.
+  migrateDatabase();
+
   // Reset any jobs that were mid-flight when the server last stopped
   // (interrupted by a restart). Queued jobs self-resume via the pump worker.
   recoverStaleJobs().catch((e) => console.error("[clip-engine] recover failed:", e));

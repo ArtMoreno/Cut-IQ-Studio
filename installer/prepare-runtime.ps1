@@ -42,11 +42,8 @@ New-Item -ItemType Directory -Path $nodeTarget -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $nodeSource.FullName "node.exe") -Destination $nodeTarget
 Copy-Item -LiteralPath (Join-Path $nodeSource.FullName "LICENSE") -Destination (Join-Path $nodeTarget "LICENSE.txt")
 
-$mariaArchive = Join-Path $cache "mariadb-11.4.5-winx64.zip"
-Save-Verified "https://archive.mariadb.org/mariadb-11.4.5/winx64-packages/mariadb-11.4.5-winx64.zip" $mariaArchive "B7C11D38657F16B837E68199D73670510AADB78F42DFA5D5FDEA31A7AAB342E3"
-Expand-Archive -LiteralPath $mariaArchive -DestinationPath $expanded -Force
-$mariaSource = Get-ChildItem -LiteralPath $expanded -Directory -Filter "mariadb-11.4.5-winx64" | Select-Object -First 1
-Copy-Item -LiteralPath $mariaSource.FullName -Destination (Join-Path $RuntimeRoot "mariadb") -Recurse
+# No database server is bundled. Cut IQ stores project metadata in a single
+# SQLite file, created and migrated by the app on first launch.
 
 # Pinned to a dated autobuild tag, not `latest`. The `latest` tag is rolling:
 # upstream republishes it, the bytes change, and the pinned checksum fails a

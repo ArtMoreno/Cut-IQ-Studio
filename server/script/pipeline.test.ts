@@ -1,5 +1,5 @@
 /**
- * Script/Project pipeline integration tests — real MariaDB via .env.
+ * Script/Project pipeline integration tests — real SQLite file via CUTIQ_DATABASE_FILE.
  * Fixtures use a unique run suffix and are deleted in afterAll so the user's
  * library and prior projects are never touched.
  */

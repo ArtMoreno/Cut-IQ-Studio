@@ -7,21 +7,16 @@ $ErrorActionPreference = "Stop"
 $installRoot = (Resolve-Path -LiteralPath $PSScriptRoot).Path
 $localRoot = if ($env:CUTIQ_LOCAL_ROOT) { [IO.Path]::GetFullPath($env:CUTIQ_LOCAL_ROOT) } else { Join-Path $env:LOCALAPPDATA "Cut IQ Studio" }
 $dataRoot = Join-Path $localRoot "Data"
-$databaseRoot = Join-Path $dataRoot "MariaDB"
 $logRoot = Join-Path $localRoot "Logs"
 $browserRoot = Join-Path $localRoot "Browser"
 $clipsRoot = if ($env:CUTIQ_CLIPS_ROOT) { [IO.Path]::GetFullPath($env:CUTIQ_CLIPS_ROOT) } else { Join-Path ([Environment]::GetFolderPath("MyVideos")) "Cut IQ Studio\Clips" }
 $configPath = Join-Path $localRoot "config.json"
 $appPidPath = Join-Path $dataRoot "cut-iq.pid"
-$dbPidPath = Join-Path $dataRoot "mariadb.pid"
 $nodePath = Join-Path $installRoot "runtime\node\node.exe"
-$mariaRoot = Join-Path $installRoot "runtime\mariadb"
-$mariaBin = Join-Path $mariaRoot "bin"
-$mariaServer = Join-Path $mariaBin "mariadbd.exe"
-$mariaInstall = Join-Path $mariaBin "mariadb-install-db.exe"
-$mariaClient = Join-Path $mariaBin "mariadb.exe"
-$mariaAdmin = Join-Path $mariaBin "mariadb-admin.exe"
-$schemaPath = Join-Path $installRoot "resources\schema.sql"
+# One SQLite file beside the user's other app data. The app creates and
+# migrates it on first launch; there is no database server to start.
+$databaseFile = Join-Path $dataRoot "cut-iq-studio.db"
+$migrationsPath = Join-Path $installRoot "resources\migrations"
 $bootPath = Join-Path $installRoot "app\dist\boot.js"
 
 function New-Secret { return ([Guid]::NewGuid().ToString("N") + [Guid]::NewGuid().ToString("N")) }
@@ -53,11 +48,11 @@ function Wait-Until([scriptblock]$Condition, [int]$Seconds, [string]$Failure) {
 }
 
 try {
-  foreach ($folder in @($localRoot, $dataRoot, $databaseRoot, $logRoot, $browserRoot, $clipsRoot)) {
+  foreach ($folder in @($localRoot, $dataRoot, $logRoot, $browserRoot, $clipsRoot)) {
     New-Item -ItemType Directory -Path $folder -Force | Out-Null
   }
-  foreach ($required in @($nodePath, $mariaServer, $mariaInstall, $mariaClient, $mariaAdmin, $schemaPath, $bootPath)) {
-    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "The Cut IQ installation is incomplete: $required" }
+  foreach ($required in @($nodePath, $migrationsPath, $bootPath)) {
+    if (-not (Test-Path -LiteralPath $required)) { throw "The Cut IQ installation is incomplete: $required" }
   }
 
   if (Test-Path -LiteralPath $configPath) {
@@ -65,55 +60,12 @@ try {
   } else {
     $config = [pscustomobject]@{
       appPort = Get-FreePort 3127 3137
-      databasePort = Get-FreePort 3317 3327
-      databaseRootPassword = New-Secret
-      databaseAppPassword = New-Secret
       appSecret = New-Secret
     }
     $config | ConvertTo-Json | Set-Content -LiteralPath $configPath -Encoding UTF8
   }
 
-  $dbPort = [int]$config.databasePort
   $appPort = [int]$config.appPort
-  $dbInitialized = Test-Path -LiteralPath (Join-Path $databaseRoot "mysql")
-  if (-not $dbInitialized) {
-    $installArgs = @("--datadir=$databaseRoot", "--password=$($config.databaseRootPassword)", "--port=$dbPort", "--silent")
-    $init = Start-Process -FilePath $mariaInstall -WorkingDirectory $mariaRoot -ArgumentList $installArgs -WindowStyle Hidden -Wait -PassThru
-    if ($init.ExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $databaseRoot "mysql"))) {
-      throw "The local Cut IQ database could not be initialized."
-    }
-  }
-
-  $dbRunning = $false
-  if (Test-Path -LiteralPath $dbPidPath) {
-    $storedPid = [int](Get-Content -LiteralPath $dbPidPath -Raw)
-    $storedProcess = Get-Process -Id $storedPid -ErrorAction SilentlyContinue
-    $dbRunning = $storedProcess -and $storedProcess.Path -eq $mariaServer
-  }
-  if (-not $dbRunning) {
-    if (-not (Test-PortFree $dbPort)) { throw "Local database port $dbPort is already in use by another application." }
-    $dbLog = Join-Path $logRoot "mariadb.log"
-    $dbArgs = @("--datadir=$databaseRoot", "--port=$dbPort", "--bind-address=127.0.0.1", "--pid-file=$dbPidPath", "--log-error=$dbLog", "--console")
-    Start-Process -FilePath $mariaServer -WorkingDirectory $mariaRoot -ArgumentList $dbArgs -WindowStyle Hidden | Out-Null
-  }
-
-  $env:MYSQL_PWD = [string]$config.databaseRootPassword
-  Wait-Until -Seconds 40 -Failure "The local Cut IQ database did not become ready." -Condition {
-    & $mariaAdmin --protocol=TCP --host=127.0.0.1 --port=$dbPort --user=root ping 2>$null | Out-Null
-    return $LASTEXITCODE -eq 0
-  }
-
-  $schemaMarker = Join-Path $dataRoot "schema-v1.ready"
-  if (-not (Test-Path -LiteralPath $schemaMarker)) {
-    $appPassword = [string]$config.databaseAppPassword
-    $bootstrap = "CREATE DATABASE IF NOT EXISTS cutiq CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS 'cutiq'@'127.0.0.1' IDENTIFIED BY '$appPassword'; ALTER USER 'cutiq'@'127.0.0.1' IDENTIFIED BY '$appPassword'; GRANT ALL PRIVILEGES ON cutiq.* TO 'cutiq'@'127.0.0.1'; FLUSH PRIVILEGES;"
-    $bootstrap | & $mariaClient --protocol=TCP --host=127.0.0.1 --port=$dbPort --user=root
-    if ($LASTEXITCODE -ne 0) { throw "The Cut IQ database account could not be created." }
-    Get-Content -LiteralPath $schemaPath -Raw | & $mariaClient --protocol=TCP --host=127.0.0.1 --port=$dbPort --user=root cutiq
-    if ($LASTEXITCODE -ne 0) { throw "The Cut IQ database schema could not be installed." }
-    New-Item -ItemType File -Path $schemaMarker -Force | Out-Null
-  }
-  Remove-Item Env:MYSQL_PWD -ErrorAction SilentlyContinue
 
   $url = "http://127.0.0.1:$appPort/"
   if (-not (Test-HttpReady $url)) {
@@ -122,7 +74,8 @@ try {
     $env:PORT = [string]$appPort
     $env:APP_ID = "cut-iq-studio"
     $env:APP_SECRET = [string]$config.appSecret
-    $env:DATABASE_URL = "mysql://cutiq:$($config.databaseAppPassword)@127.0.0.1:$dbPort/cutiq"
+    $env:CUTIQ_DATABASE_FILE = $databaseFile
+    $env:CUTIQ_MIGRATIONS_DIR = $migrationsPath
     $env:CLIPSIFT_APP_ROOT = Join-Path $installRoot "app"
     $env:CLIPSIFT_INSTALL_ROOT = $installRoot
     $env:CLIPSIFT_RUNTIME_DIR = Join-Path $installRoot "runtime"
