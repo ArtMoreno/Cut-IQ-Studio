@@ -32,7 +32,8 @@ jobs:
     env:
       APP_ID: cut-iq-studio-ci
       APP_SECRET: cut-iq-studio-ci-only
-      CUTIQ_DATABASE_FILE: ${{ runner.temp }}/cut-iq-ci.db
+      # runner.* is not available in job-level env, only inside steps.
+      CUTIQ_DATABASE_FILE: ${{ github.workspace }}/cut-iq-ci.db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
